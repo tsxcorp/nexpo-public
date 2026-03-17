@@ -12,6 +12,7 @@ export interface FormSubmission {
   date_started?: string
   date_sumitted?: string
   group_id?: string
+  registration_id?: string
 }
 
 export async function POST(req: NextRequest) {
@@ -51,6 +52,9 @@ export async function POST(req: NextRequest) {
           }
           if (body.group_id) {
             submissionData.group_id = body.group_id
+          }
+          if (body.registration_id) {
+            submissionData.registration_id = body.registration_id
           }
 
     const response = await directusApi.request(

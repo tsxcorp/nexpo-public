@@ -2,6 +2,7 @@
 
 import { Forms, FormField } from '@/directus/types'
 import { useState, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import VAlert from '@/components/base/VAlert'
 import { useForm } from 'react-hook-form'
 import { ErrorMessage } from '@hookform/error-message'
@@ -72,6 +73,8 @@ function VForm(props: FormProps) {
   console.log('🔴 VForm RENDERING - Schema Length:', form.schema?.length);
 
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const registrationId = searchParams.get('registration_id') ?? undefined
 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -127,6 +130,7 @@ function VForm(props: FormProps) {
             answers,
             form: props.form.id,
             date_started: new Date().toISOString(),
+            registration_id: registrationId,
           }),
         })
 
@@ -172,6 +176,7 @@ function VForm(props: FormProps) {
               answers: allAnswers,
               form: props.form.id,
               date_started: new Date().toISOString(),
+              registration_id: registrationId,
             }),
           })
 
