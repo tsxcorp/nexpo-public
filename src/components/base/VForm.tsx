@@ -113,11 +113,17 @@ function VForm(props: FormProps) {
 
   async function submitForm(data: any) {
     setLoading(true)
+    // Build name → UUID map so form_answers.field receives the field UUID (FK to form_fields.id)
+    const nameToIdMap = schema.reduce((acc, f) => {
+      if (f.name && f.id) acc[f.name] = f.id;
+      return acc;
+    }, {} as Record<string, string>);
+
     try {
       // If form doesn't allow groups, use original logic
       if (!form.is_allow_group || groupFields.length === 0) {
-        const answers = Object.entries(data).map(([field, value]) => ({
-          field,
+        const answers = Object.entries(data).map(([fieldName, value]) => ({
+          field: nameToIdMap[fieldName] || fieldName,
           value: String(value || '')
         }));
 
@@ -162,8 +168,8 @@ function VForm(props: FormProps) {
 
         if (!hasGroupMembers) {
           // No group members added, create single submission without is_lead and group_id
-          const allAnswers = Object.entries(data).map(([field, value]) => ({
-            field,
+          const allAnswers = Object.entries(data).map(([fieldName, value]) => ({
+            field: nameToIdMap[fieldName] || fieldName,
             value: String(value || '')
           }));
 
@@ -190,8 +196,8 @@ function VForm(props: FormProps) {
           const submissions = []
 
           // Lead submission (only lead fields)
-          const leadAnswers = Object.entries(leadData).map(([field, value]) => ({
-            field,
+          const leadAnswers = Object.entries(leadData).map(([fieldName, value]) => ({
+            field: nameToIdMap[fieldName] || fieldName,
             value: String(value || '')
           }));
 
@@ -207,8 +213,8 @@ function VForm(props: FormProps) {
 
           // Group submissions (only group fields for each section)
           Object.entries(groupData).forEach(([sectionIndex, sectionData]) => {
-            const groupAnswers = Object.entries(sectionData).map(([field, value]) => ({
-              field,
+            const groupAnswers = Object.entries(sectionData).map(([fieldName, value]) => ({
+              field: nameToIdMap[fieldName] || fieldName,
               value: String(value || '')
             }));
 
