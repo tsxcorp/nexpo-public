@@ -108,7 +108,7 @@ export const getSiteByDomain = async (domain: string): Promise<Sites | null> => 
               _eq: domain
             }
           },
-          fields: ['*'],
+          fields: ['id', 'name', 'slug', 'domain', 'domain_verified', 'status', 'navigation'],
           limit: 1
         }),
         60

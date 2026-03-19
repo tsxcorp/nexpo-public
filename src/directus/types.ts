@@ -47,6 +47,7 @@ export interface Sites {
   favicon?: DirectusFile;
   logo?: DirectusFile;
   domain?: string;
+  domain_verified?: boolean;
   status?: 'draft' | 'published';
   navigation?: string[];
   languages?: Array<{
