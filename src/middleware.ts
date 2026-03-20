@@ -27,7 +27,19 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   // Use host header for accurate hostname (avoids IPv6 port issues)
   let hostname = request.headers.get('host')?.split(':')[0] || request.nextUrl.hostname
-  console.log('[middleware] Processing:', { pathname, hostname })
+
+  // === DIAGNOSTIC LOG — remove after debugging ===
+  console.log('[MW_DIAG]', JSON.stringify({
+    pathname,
+    hostname,
+    host_header: request.headers.get('host'),
+    nexturl_hostname: request.nextUrl.hostname,
+    MAIN_DOMAIN,
+    VERCEL_URL,
+    slugBasedDomains,
+    matchesSlugBased: slugBasedDomains.some(d => hostname.includes(d)),
+  }))
+  // ===============================================
 
   // Skip internal paths or special routes — MUST BE FIRST
   if (

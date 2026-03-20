@@ -30,17 +30,16 @@ export function getRoutingContext(hostnameOverride?: string, currentPathname?: s
     return { isDomainBased: false, siteSlug: null }
   }
   
-  // Check if this is a production domain with mapping
-  const productionDomains: Record<string, string> = {
-    'event.nexpo.vn': 'nexpo'
+  // event.nexpo.vn and Vercel preview URLs are slug-based hubs, NOT custom domains
+  const slugBasedProductionDomains = [
+    'event.nexpo.vn',
+    '.vercel.app',
+  ]
+  if (slugBasedProductionDomains.some(d => hostname.includes(d))) {
+    return { isDomainBased: false, siteSlug: null }
   }
-  
-  const siteSlug = productionDomains[hostname]
-  if (siteSlug) {
-    return { isDomainBased: true, siteSlug }
-  }
-  
-  // For other domains, assume domain-based routing
+
+  // For other domains, assume domain-based routing (custom domain)
   return { isDomainBased: true, siteSlug: null }
 }
 
