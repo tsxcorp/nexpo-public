@@ -78,17 +78,6 @@ function handleSlugBasedRouting(request: NextRequest, pathname: string) {
     return NextResponse.redirect(newUrl)
   }
 
-  // Language prefix without site slug — redirect to default site
-  const hasLanguagePrefix = supportedLanguages.some(lang =>
-    pathname.startsWith(`/${lang}/`) || pathname === `/${lang}`
-  )
-  if (hasLanguagePrefix) {
-    const [, lang, ...rest] = pathname.split('/')
-    const remainingPath = rest.join('/')
-    const newUrl = new URL(`/nexpo/${lang}${remainingPath ? `/${remainingPath}` : ''}`, request.url)
-    return NextResponse.redirect(newUrl)
-  }
-
   // Root or unknown path — redirect to default site homepage
   const newUrl = new URL(`/nexpo/${defaultLanguage}`, request.url)
   return NextResponse.redirect(newUrl)

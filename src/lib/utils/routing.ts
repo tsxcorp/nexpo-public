@@ -82,33 +82,17 @@ export function getSiteSlugFromPathname(pathname: string): string | null {
 // Helper function to build URL based on routing context
 export function buildUrl(lang: string, permalink: string, hostnameOverride?: string, currentPathname?: string): string {
   const { isDomainBased, siteSlug } = getRoutingContext(hostnameOverride, currentPathname)
-  
-  console.log('[buildUrl] Debug:', { lang, permalink, hostnameOverride, isDomainBased, siteSlug, currentPathname })
-  
-  // Additional check for domain-based routing when pathname contains site slug
-  // This happens when middleware rewrites URLs for domain-based routing
-  const hostname = hostnameOverride || (typeof window !== 'undefined' ? window.location.hostname : '')
-  const productionDomains: Record<string, string> = {
-    'event.nexpo.vn': 'nexpo'
-  }
-  
-  const actualSiteSlug = productionDomains[hostname]
-  const isActuallyDomainBased = actualSiteSlug && hostname !== 'localhost' && !hostname.includes('127.0.0.1')
-  
-  if (isDomainBased || isActuallyDomainBased) {
-    // Domain-based routing: /{lang}/{permalink}
-    // Domain is just an alias for the site slug
-    const cleanPermalink = permalink.startsWith('/') ? permalink.slice(1) : permalink
+
+  const cleanPermalink = permalink.startsWith('/') ? permalink.slice(1) : permalink
+
+  if (isDomainBased) {
+    // Domain-based routing (custom domain): /{lang}/{permalink}
     const url = `/${lang}${cleanPermalink ? `/${cleanPermalink}` : ''}`
-    console.log('[buildUrl] Domain-based URL:', url)
     return url
   } else {
-    // Slug-based routing: /{site}/{lang}/{permalink}
-    // Get site slug from current pathname or use provided siteSlug
+    // Slug-based routing (event.nexpo.vn/[site]/[lang]/...): /{site}/{lang}/{permalink}
     const currentSiteSlug = siteSlug || (currentPathname ? getSiteSlugFromPathname(currentPathname) : null) || 'nexpo'
-    const cleanPermalink = permalink.startsWith('/') ? permalink.slice(1) : permalink
     const url = `/${currentSiteSlug}/${lang}${cleanPermalink ? `/${cleanPermalink}` : ''}`
-    console.log('[buildUrl] Slug-based URL:', url)
     return url
   }
 }
