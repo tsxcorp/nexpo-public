@@ -13,7 +13,15 @@ const defaultLanguage = 'en'
 const MAIN_DOMAIN = process.env.NEXT_PUBLIC_MAIN_DOMAIN || 'event.nexpo.vn'
 
 // Domains that use slug-based routing: /[site]/[lang]/[...slug]
-const slugBasedDomains = ['localhost', '127.0.0.1', MAIN_DOMAIN]
+// Include Vercel preview URL (VERCEL_URL is auto-set by Vercel, no NEXT_PUBLIC_ needed in middleware)
+const VERCEL_URL = process.env.VERCEL_URL || ''
+const slugBasedDomains = [
+  'localhost',
+  '127.0.0.1',
+  'event.nexpo.vn',   // always include the real production domain
+  MAIN_DOMAIN,        // from env var (may differ in staging/preview)
+  ...(VERCEL_URL ? [VERCEL_URL] : []),  // vercel preview URL
+]
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
