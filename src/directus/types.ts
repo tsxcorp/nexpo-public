@@ -50,11 +50,103 @@ export interface Sites {
   domain_verified?: boolean;
   status?: 'draft' | 'published';
   navigation?: string[];
+  event_id?: number | null;
   languages?: Array<{
     code: string;
     name: string;
     direction: string;
   }>;
+}
+
+// --- Event data types ---
+
+export interface ExhibitorTranslation {
+  languages_code: string;
+  company_name?: string;
+  company_description?: string;
+}
+
+export interface Exhibitor {
+  id: string;
+  status?: string;
+  logo?: string | null;
+  website?: string | null;
+  translations?: ExhibitorTranslation[];
+}
+
+export interface IndustryTranslation {
+  languages_code: string;
+  category?: string;
+}
+
+export interface ExhibitorEvent {
+  id: string;
+  booth_number?: string | null;
+  nameboard?: string | null;
+  is_featured?: boolean;
+  exhibitor_id?: Exhibitor | null;
+  industry_translations?: IndustryTranslation[];
+}
+
+export interface SpeakerTranslation {
+  languages_code: string;
+  bio?: string | null;
+  name?: string | null;
+  title?: string | null;
+  company?: string | null;
+}
+
+export interface Speaker {
+  id: string;
+  status?: string;
+  sort?: number;
+  name: string;
+  position?: string | null;
+  company?: string | null;
+  photo?: string | null;
+  bio?: string | null;
+  linkedin_url?: string | null;
+  social_links?: Array<{ platform: string; url: string }> | null;
+  translations?: SpeakerTranslation[];
+}
+
+export interface AgendaTrack {
+  id: string;
+  track_slug?: string;
+  default_name?: string;
+  track_color?: string | null;
+  translations?: Array<{ languages_code: string; name?: string }>;
+}
+
+export interface AgendaTranslation {
+  languages_code: string;
+  title?: string;
+  description?: string | null;
+}
+
+// M2M junction record: agendas_speakers → speakers
+export interface AgendaSpeakerJunction {
+  speakers_id?: {
+    id: string;
+    name: string;
+    photo?: string | null;
+    avatar?: string | null;
+  } | null;
+}
+
+export interface AgendaSession {
+  id: string;
+  status?: string;
+  date?: string | null;
+  day_number?: number | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  location?: string | null;
+  session_type?: string | null;
+  is_featured?: boolean;
+  track_id?: string | null;         // returned as UUID string
+  speakers?: AgendaSpeakerJunction[];
+  translations?: AgendaTranslation[];
 }
 
 export interface Page {

@@ -34,6 +34,30 @@
     "headline": "<p>How can we <em>help</em> you?</p>",
     "all_collections": "All Documentations"
   },
+  "exhibitors": {
+    "page_title": "Exhibitors",
+    "search_placeholder": "Search exhibitors...",
+    "filter_all": "All",
+    "booth": "Booth",
+    "website": "Website",
+    "no_results": "No exhibitors found",
+    "featured": "Featured",
+    "view_all": "View all exhibitors"
+  },
+  "agenda": {
+    "page_title": "Agenda",
+    "all_days": "All days",
+    "day": "Day",
+    "all_tracks": "All tracks",
+    "no_sessions": "No sessions scheduled",
+    "view_all": "View full agenda"
+  },
+  "speakers": {
+    "page_title": "Speakers",
+    "no_speakers": "No speakers yet",
+    "view_all": "View all speakers",
+    "search_placeholder": "Search speakers..."
+  },
   "posts": {
     "page_title": "All Posts",
     "search": "Search",

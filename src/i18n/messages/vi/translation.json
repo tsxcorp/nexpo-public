@@ -34,6 +34,30 @@
     "headline": "<p>Bạn cần <em>giúp đỡ</em> gì?</p>",
     "all_collections": "Tất cả tài liệu"
   },
+  "exhibitors": {
+    "page_title": "Nhà triển lãm",
+    "search_placeholder": "Tìm kiếm nhà triển lãm...",
+    "filter_all": "Tất cả",
+    "booth": "Gian hàng",
+    "website": "Trang web",
+    "no_results": "Không tìm thấy nhà triển lãm nào",
+    "featured": "Nổi bật",
+    "view_all": "Xem tất cả nhà triển lãm"
+  },
+  "agenda": {
+    "page_title": "Lịch chương trình",
+    "all_days": "Tất cả các ngày",
+    "day": "Ngày",
+    "all_tracks": "Tất cả track",
+    "no_sessions": "Chưa có lịch chương trình",
+    "view_all": "Xem toàn bộ lịch"
+  },
+  "speakers": {
+    "page_title": "Diễn giả",
+    "no_speakers": "Chưa có thông tin diễn giả",
+    "view_all": "Xem tất cả diễn giả",
+    "search_placeholder": "Tìm kiếm diễn giả..."
+  },
   "posts": {
     "page_title": "Tất cả bài viết",
     "search": "Tìm kiếm bài viết",
