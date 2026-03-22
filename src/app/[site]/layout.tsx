@@ -28,10 +28,15 @@ export async function generateMetadata({ params }: { params: Promise<{ site: str
       ? `${directusUrl}/assets/${siteData.favicon}` 
       : '/favicon.ico';
     
+    // Prefer: globals title → site translations title (any lang) → site name field → slug
+    const siteTranslationTitle = siteData?.translations?.find(t =>
+      t.languages_code?.startsWith('en') || t.languages_code?.startsWith('vi')
+    )?.title || siteData?.translations?.[0]?.title;
+    const siteName = defaultTranslation?.title || siteTranslationTitle || siteData?.name || siteSlug;
     return {
       title: {
-        default: defaultTranslation?.title || siteData?.name || 'Site',
-        template: `%s | ${defaultTranslation?.title || siteData?.name || 'Site'}`
+        default: siteName,
+        template: `%s | ${siteName}`
       },
       description: defaultTranslation?.description || 'Site description',
       icons: {

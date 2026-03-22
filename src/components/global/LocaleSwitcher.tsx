@@ -145,7 +145,7 @@ export default function LocaleSwitcher({ locales = [], site, translations = [], 
     <div ref={dropdownRef} className="relative">
       <button
         tabIndex={0}
-        className="px-2 py-2 rounded-full shadow-sm hover:bg-[var(--color-primary)] text-gray-800 flex items-center text-3xl"
+        className="px-1.5 py-1.5 md:px-2 md:py-2 rounded-full shadow-sm hover:bg-[var(--color-primary)] text-gray-800 flex items-center text-xl md:text-3xl"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}

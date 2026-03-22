@@ -46,7 +46,7 @@ export const fetchGlobals = async (siteId?: string): Promise<Globals | null> => 
     const globals = await directus.request(
       withRevalidate(
         readItems('globals' as any, {
-          fields: ['*'],
+          fields: ['*', 'translations.*'],
           filter: filters,
           limit: 1
         }),

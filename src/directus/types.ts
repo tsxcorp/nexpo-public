@@ -40,6 +40,21 @@ export interface TeamTranslation {
   team_id?: Team;
 }
 
+export interface EventBasicInfo {
+  id: number;
+  name?: string;
+  start_date?: string | null;
+  end_date?: string | null;
+  location?: string | null;
+}
+
+export interface SiteTranslation {
+  id?: string | number;
+  languages_code: string;
+  title?: string;
+  description?: string;
+}
+
 export interface Sites {
   id: string;
   name?: string;
@@ -51,6 +66,8 @@ export interface Sites {
   status?: 'draft' | 'published';
   navigation?: string[];
   event_id?: number | null;
+  event?: EventBasicInfo | null;
+  translations?: SiteTranslation[];
   languages?: Array<{
     code: string;
     name: string;

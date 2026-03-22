@@ -1,7 +1,7 @@
-import { readItems } from '@directus/sdk'
+import { readItems, readItem } from '@directus/sdk'
 import directus from '../client'
 import { withRevalidate, safeApiCall } from '../utils'
-import type { Sites } from '@/directus/types'
+import type { Sites, EventBasicInfo } from '@/directus/types'
 
 // Mock data for fallback when Directus is not available
 const getMockSite = (siteSlug: string): Sites => ({
@@ -26,7 +26,7 @@ export const getSite = async (siteSlug: string): Promise<Sites | null> => {
               _eq: siteSlug
             }
           },
-          fields: ['*','navigation.type'],
+          fields: ['*', 'navigation.type', 'translations.*'],
           limit: 1
         }),
         60
@@ -77,9 +77,36 @@ export const getSite = async (siteSlug: string): Promise<Sites | null> => {
 
     console.log('Languages response:', languages);
 
+    // Fetch linked event basic info if event_id exists
+    let event: EventBasicInfo | null = null;
+    if (sites[0].event_id) {
+      try {
+        const eventData = await directus.request(
+          withRevalidate(
+            readItem('events' as any, sites[0].event_id as any, {
+              fields: ['id', 'name', 'start_date', 'end_date', 'location'] as any,
+            }),
+            300
+          )
+        ) as any;
+        if (eventData) {
+          event = {
+            id: eventData.id,
+            name: eventData.name,
+            start_date: eventData.start_date ?? null,
+            end_date: eventData.end_date ?? null,
+            location: eventData.location ?? null,
+          };
+        }
+      } catch {
+        // Event fetch failure is non-critical — continue without it
+      }
+    }
+
     const siteWithLanguages: Sites = {
       ...sites[0],
-      languages: languages || []
+      languages: languages || [],
+      event: event ?? null,
     };
 
     console.log('✅ Site found:', {
@@ -87,7 +114,8 @@ export const getSite = async (siteSlug: string): Promise<Sites | null> => {
       name: siteWithLanguages.name,
       navigation: siteWithLanguages.navigation,
       status: siteWithLanguages.status,
-      languages: siteWithLanguages.languages
+      languages: siteWithLanguages.languages,
+      event: siteWithLanguages.event,
     });
 
     return siteWithLanguages;

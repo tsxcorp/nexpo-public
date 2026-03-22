@@ -15,5 +15,7 @@ export default async function SiteLayout({
   // Initialize i18n instance
   await getTranslations({ locale: lang })
 
-  return <>{children}</>;
+  // pt-16 = header height on mobile (~64px: logo h-10 + py-3)
+  // md:pt-20 = header height on desktop (~80px: logo h-14 + py-3)
+  return <div className="pt-16 md:pt-20">{children}</div>;
 } 
