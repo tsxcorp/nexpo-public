@@ -1,5 +1,6 @@
 import './globals.css';
 import React from 'react';
+import type { Metadata } from 'next';
 import { Inter, Poppins, Fira_Code } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
@@ -13,9 +14,13 @@ const firaCode = Fira_Code({
   variable: '--font-code'
 });
 
-export const metadata = {
-  title: 'Nexpo',
+export const metadata: Metadata = {
+  title: 'Nexpo Public Event Site',
   description: 'Nexpo Event Platform',
+  icons: {
+    icon: '/nexpo-symbol.png',
+    apple: '/nexpo-symbol.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -43,16 +43,6 @@ function getNavigationUrl(item: NavigationItem, currentLang: string, currentPath
   return result
 }
 
-// Nexpo X logo SVG
-function NexpoLogo() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="40" height="40" rx="6" fill="white" fillOpacity="0.12" />
-      <path d="M10 10L20 20M20 20L30 10M20 20L10 30M20 20L30 30" stroke="#4F80FF" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
-
 function NexpoBar({ currentYear }: { currentYear: string }) {
   return (
     <div style={{ backgroundColor: '#06043E' }} className="w-full">
@@ -64,11 +54,15 @@ function NexpoBar({ currentYear }: { currentYear: string }) {
           rel="noopener noreferrer"
           className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
         >
-          <NexpoLogo />
+          {/* Nexpo symbol — inline SVG, no file dependency */}
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="28" height="28" rx="6" fill="#4F80FF" fillOpacity="0.2"/>
+            <path d="M7 7L14 14M14 14L21 7M14 14L7 21M14 14L21 21" stroke="#4F80FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
           <div className="flex flex-col leading-tight">
             <span className="text-white text-xs font-semibold tracking-wide">
               Event Website by{' '}
-              <span style={{ color: '#4F80FF' }} className="font-bold">NEXPO</span>
+              <span style={{ color: '#4F80FF' }} className="font-bold tracking-wider">NEXPO</span>
             </span>
             <span className="text-white/50 text-[10px]">
               Business Platform &amp; Exhibition Operations
