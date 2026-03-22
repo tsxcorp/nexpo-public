@@ -31,6 +31,9 @@ export default function PageBuilder({ blocks, lang, teamMembersMap }: PageBuilde
   return (
     <>
       {blocks.map((block, index) => {
+          // Guard: skip blocks with null/undefined items to prevent crashes
+          if (!block.item) return null
+
           switch (block.collection) {
             case 'block_features':
             return <FeaturesBlock key={index} data={block.item} lang={lang} />
@@ -64,6 +67,13 @@ export default function PageBuilder({ blocks, lang, teamMembersMap }: PageBuilde
             return <TeamBlock key={index} data={block.item} lang={lang} teams={block.item.team || []} />
             case 'block_form':
             return <FormBlock key={index} data={block.item} lang={lang} />
+            // Event data blocks — rendered as null until dedicated components are built
+            case 'block_exhibitors':
+            case 'block_speakers':
+            case 'block_agenda_preview':
+            case 'block_countdown':
+            case 'block_event_info':
+            return null
           default:
             return null
           }

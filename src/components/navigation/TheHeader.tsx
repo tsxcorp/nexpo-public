@@ -100,7 +100,7 @@ function TheHeaderContent({ navigation, lang, site, siteData, translations, path
           </Link>
         </div>
         <nav className="flex gap-6">
-          {navigation && Array.isArray(navigation.items) && navigation.items.map((item: NavigationItem) => {
+          {navigation && Array.isArray(navigation.items) && navigation.items.filter(Boolean).map((item: NavigationItem) => {
             const title = item.translations?.[0]?.title || '';
             return (
               <Link 

@@ -109,18 +109,20 @@ export const fetchNavigationSafe = async function name(siteSlug: string, lang: s
     const langMap = { vi: 'vi-VN', en: 'en-US' } as const;
     const directusLang = langMap[lang as keyof typeof langMap] || lang;
 
-    const processedItems = navigation[0].items.map((item: NavigationItem) => {
-      const matchingTranslation = Array.isArray(item.translations) && item.translations.length > 0
-        ? item.translations.find(
-            (trans: { languages_code: string }) => trans.languages_code === directusLang
-          ) || item.translations[0]
-        : undefined;
+    const processedItems = (navigation[0].items ?? [])
+      .filter((item: NavigationItem | null) => item != null)
+      .map((item: NavigationItem) => {
+        const matchingTranslation = Array.isArray(item.translations) && item.translations.length > 0
+          ? item.translations.find(
+              (trans: { languages_code: string }) => trans.languages_code === directusLang
+            ) || item.translations[0]
+          : undefined;
 
-      return {
-        ...item,
-        translations: matchingTranslation ? [matchingTranslation] : [],
-      };
-    });
+        return {
+          ...item,
+          translations: matchingTranslation ? [matchingTranslation] : [],
+        };
+      });
 
     return {
       id: navigation[0].id,
