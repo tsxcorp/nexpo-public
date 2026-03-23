@@ -1,6 +1,5 @@
 "use client";
 import React from 'react'
-import { Pages, Navigation } from '@/directus/types'
 import RichTextBlock from '@/components/blocks/RichTextBlock'
 import HeroBlock from '@/components/blocks/HeroBlock'
 import GalleryBlock from '@/components/blocks/GalleryBlock'
@@ -17,67 +16,94 @@ import CardGroupBlock from '@/components/blocks/CardGroupBlock'
 import FormBlock from '@/components/blocks/FormBlock'
 import TeamBlock from '@/components/blocks/TeamBlock'
 import FeaturesBlock from '@/components/blocks/FeaturesBlock'
-import TheHeader from './navigation/TheHeader'
-import TheFooter from './navigation/TheFooter'
-import type { Schema as DirectusSchema } from '@/types/directus'
+import ExhibitorsBlock from '@/components/blocks/ExhibitorsBlock'
+import SpeakersBlock from '@/components/blocks/SpeakersBlock'
+import AgendaPreviewBlock from '@/components/blocks/AgendaPreviewBlock'
+import CountdownBlock from '@/components/blocks/CountdownBlock'
+import EventInfoBlock from '@/components/blocks/EventInfoBlock'
+import type { ExhibitorEvent, Speaker, AgendaSession, EventBasicInfo } from '@/directus/types'
 
 interface PageBuilderProps {
   blocks: any[]
   lang: string
   teamMembersMap?: Record<string, any[]>
+  // Event data for event-specific blocks
+  siteData?: any
+  exhibitors?: ExhibitorEvent[]
+  speakers?: Speaker[]
+  agendaSessions?: AgendaSession[]
 }
 
-export default function PageBuilder({ blocks, lang, teamMembersMap }: PageBuilderProps) {
+export default function PageBuilder({
+  blocks,
+  lang,
+  teamMembersMap,
+  siteData,
+  exhibitors = [],
+  speakers = [],
+  agendaSessions = [],
+}: PageBuilderProps) {
+  const event: EventBasicInfo | null = siteData?.event ?? null;
+  const site = siteData?.slug || '';
+  const agendaUrl = site ? `/${site}/${lang}/agenda` : undefined;
+  const registerUrl = site ? `/${site}/${lang}/register` : undefined;
+
   return (
     <>
       {blocks.map((block, index) => {
-          // Guard: skip blocks with null/undefined items to prevent crashes
-          if (!block.item) return null
+        // Guard: skip blocks with null/undefined items to prevent crashes
+        if (!block.item) return null
 
-          switch (block.collection) {
-            case 'block_features':
+        switch (block.collection) {
+          case 'block_features':
             return <FeaturesBlock key={index} data={block.item} lang={lang} />
-            case 'block_richtext':
+          case 'block_richtext':
             return <RichTextBlock key={index} data={block.item} lang={lang} />
-            case 'block_hero':
+          case 'block_hero':
             return <HeroBlock key={index} data={block.item} lang={lang} />
-            case 'block_gallery':
+          case 'block_gallery':
             return <GalleryBlock key={index} data={block.item} lang={lang} />
-            case 'block_quote':
+          case 'block_quote':
             return <QuoteBlock key={index} data={block.item} lang={lang} />
-            case 'block_logocloud':
+          case 'block_logocloud':
             return <LogoCloudBlock key={index} data={block.item} lang={lang} />
-            case 'block_video':
+          case 'block_video':
             return <VideoBlock key={index} data={block.item} lang={lang} />
-            case 'block_testimonials':
+          case 'block_testimonials':
             return <TestimonialsBlock key={index} data={block.item} lang={lang} />
-            case 'block_steps':
+          case 'block_steps':
             return <StepsBlock key={index} data={block.item} lang={lang} />
-            case 'block_faqs':
+          case 'block_faqs':
             return <FaqsBlock key={index} data={block.item} lang={lang} />
-            case 'block_cta':
+          case 'block_cta':
             return <CtaBlock key={index} data={block.item} lang={lang} />
-            case 'block_html':
+          case 'block_html':
             return <RawHtmlBlock key={index} data={block.item} lang={lang} />
-            case 'block_columns':
+          case 'block_columns':
             return <ColumnsBlock key={index} data={block.item} lang={lang} />
-            case 'block_cardgroup':
+          case 'block_cardgroup':
             return <CardGroupBlock key={index} data={block.item} lang={lang} />
-            case 'block_team':
+          case 'block_team':
             return <TeamBlock key={index} data={block.item} lang={lang} teams={block.item.team || []} />
-            case 'block_form':
+          case 'block_form':
             return <FormBlock key={index} data={block.item} lang={lang} />
-            // Event data blocks — rendered as null until dedicated components are built
-            case 'block_exhibitors':
-            case 'block_speakers':
-            case 'block_agenda_preview':
-            case 'block_countdown':
-            case 'block_event_info':
-            return null
+
+          // Event data blocks
+          case 'block_exhibitors':
+            return <ExhibitorsBlock key={index} data={block.item} lang={lang} exhibitors={exhibitors} />
+          case 'block_speakers':
+            return <SpeakersBlock key={index} data={block.item} lang={lang} speakers={speakers} />
+          case 'block_agenda_preview':
+            return <AgendaPreviewBlock key={index} data={block.item} lang={lang} agendaSessions={agendaSessions} agendaUrl={agendaUrl} />
+          case 'block_countdown':
+            return <CountdownBlock key={index} data={block.item} lang={lang} eventStartDate={event?.start_date} />
+          case 'block_event_info':
+            return <EventInfoBlock key={index} data={block.item} lang={lang} event={event} registerUrl={registerUrl} />
+
           default:
             return null
-          }
-        })}
+        }
+      })}
     </>
   )
 }

@@ -2,9 +2,11 @@ import React from 'react';
 import { fetchNavigationSafe } from '@/directus/queries/navigation';
 import { fetchPage } from '@/directus/queries/pages';
 import { getSite } from '@/directus/queries/sites';
+import { fetchExhibitors } from '@/directus/queries/exhibitors';
+import { fetchSpeakers } from '@/directus/queries/speakers';
+import { fetchAgendaSessions } from '@/directus/queries/agenda';
 import TheHeader from '@/components/navigation/TheHeader';
 import TheFooter from '@/components/navigation/TheFooter';
-import { Navigation } from '@/directus/types';
 import type { Page } from '@/directus/types';
 import PageBuilder from '@/components/PageBuilder'
 import { PageProps } from '@/types/next';
@@ -56,12 +58,18 @@ export default async function Page({ params, searchParams }: PageProps) {
     }>;
   }) | null;
 
-  // Explicitly type translation
-  const translation = (pageContent?.translations?.[0] ?? {}) as {
-    title?: string;
-    description?: string;
-    blocks?: any[];
-  };
+  // Conditionally fetch event data only for blocks that need it
+  const blocks = Array.isArray(pageContent?.blocks) ? pageContent.blocks : [];
+  const eventId = siteData?.event_id as number | undefined;
+  const needsExhibitors = blocks.some((b: any) => b.collection === 'block_exhibitors');
+  const needsSpeakers = blocks.some((b: any) => b.collection === 'block_speakers');
+  const needsAgenda = blocks.some((b: any) => b.collection === 'block_agenda_preview');
+
+  const [exhibitors, speakers, agendaSessions] = await Promise.all([
+    needsExhibitors && eventId ? fetchExhibitors(eventId) : Promise.resolve([]),
+    needsSpeakers && eventId ? fetchSpeakers(eventId) : Promise.resolve([]),
+    needsAgenda && eventId ? fetchAgendaSessions(eventId) : Promise.resolve([]),
+  ]);
 
   if (!pageContent) {
     console.log('\nNo page content found, showing 404');
@@ -98,7 +106,14 @@ export default async function Page({ params, searchParams }: PageProps) {
       <TheHeader navigation={mainNav} lang={lang} site={siteData?.slug || site} siteData={siteData} translations={pageContent?.translations || []} pathname={currentPathname} />
       <div className="min-h-screen w-full bg-gray-50 py-12">
         <div className="w-full px-4 md:px-8 lg:px-16">
-          <PageBuilder blocks={Array.isArray(pageContent.blocks) ? pageContent.blocks : []} lang={lang} />
+          <PageBuilder
+              blocks={Array.isArray(pageContent.blocks) ? pageContent.blocks : []}
+              lang={lang}
+              siteData={siteData}
+              exhibitors={exhibitors}
+              speakers={speakers}
+              agendaSessions={agendaSessions}
+            />
         </div>
       </div>
       <TheFooter navigation={footerNav} lang={lang} pathname={currentPathname} />

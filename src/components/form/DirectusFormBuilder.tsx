@@ -145,6 +145,28 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
         </div>
       );
 
+    case 'date':
+      return (
+        <input
+          {...commonProps}
+          type="date"
+          placeholder={undefined}
+          className={cn(commonProps.className, 'cursor-pointer')}
+          {...register(element.name, getValidationRules())}
+        />
+      );
+
+    case 'datetime':
+      return (
+        <input
+          {...commonProps}
+          type="datetime-local"
+          placeholder={undefined}
+          className={cn(commonProps.className, 'cursor-pointer')}
+          {...register(element.name, getValidationRules())}
+        />
+      );
+
     case 'file':
     case 'image': {
       const isImage = (element.$formkit || element.type) === 'image';

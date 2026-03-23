@@ -60,13 +60,19 @@ export const safeApiCall = async <T>(
     
     return await apiCall()
   } catch (error) {
-    console.error(`[Directus API] ${operationName} failed:`, error)
-    if (error instanceof Error) {
+    // Directus SDK throws non-Error objects — extract message from errors array
+    if (error && typeof error === 'object' && 'errors' in error) {
+      const directusErrors = (error as { errors: Array<{ message: string; extensions?: { code: string } }> }).errors
+      console.error(`[Directus API] ${operationName} failed:`, JSON.stringify(directusErrors))
+    } else if (error instanceof Error) {
+      console.error(`[Directus API] ${operationName} failed:`, error.message)
       if (error.message.includes('fetch failed') || error.message.includes('Failed to fetch')) {
         console.error('[Directus API] Connection error - Directus server is not running or not accessible')
       } else if (error.message.includes('timeout')) {
         console.error('[Directus API] Request timeout - Directus server is not responding')
       }
+    } else {
+      console.error(`[Directus API] ${operationName} failed:`, JSON.stringify(error))
     }
     return fallback
   }

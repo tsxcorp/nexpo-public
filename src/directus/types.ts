@@ -348,7 +348,7 @@ export interface FormField {
   id: string;
   form_id?: string;
   name: string;
-  type: 'input' | 'textarea' | 'select' | 'email' | 'number' | 'multiselect' | 'file' | 'image';
+  type: 'input' | 'textarea' | 'select' | 'email' | 'number' | 'multiselect' | 'file' | 'image' | 'date' | 'datetime';
   width?: string;
   validation?: string;
   conditions?: any;
