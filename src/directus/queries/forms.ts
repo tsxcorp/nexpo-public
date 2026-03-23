@@ -10,7 +10,7 @@ export const fetchRegistrationForm = async (
   return await safeApiCall(
     async () => {
       // Fetch the registration form for this event
-      const filter: Record<string, unknown> = {
+      const filter: any = {
         status: { _eq: 'published' },
         is_registration: { _eq: true },
       }
