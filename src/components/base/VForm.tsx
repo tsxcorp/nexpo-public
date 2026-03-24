@@ -111,6 +111,15 @@ function VForm(props: FormProps) {
     })
   }
 
+  async function uploadFileField(file: File): Promise<string> {
+    const fd = new FormData()
+    fd.append('file', file, file.name)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    if (!res.ok) throw new Error('File upload failed')
+    const { id } = await res.json()
+    return id as string
+  }
+
   async function submitForm(data: any) {
     setLoading(true)
     // Build name → UUID map so form_answers.field receives the field UUID (FK to form_fields.id)
@@ -119,7 +128,20 @@ function VForm(props: FormProps) {
       return acc;
     }, {} as Record<string, string>);
 
+    // Identify file/image fields and upload them first
+    const fileFieldNames = new Set(
+      schema.filter(f => f.type === 'file' || f.type === 'image').map(f => f.name)
+    )
+
     try {
+      // Upload any file/image values to Directus, replace with UUID
+      for (const [key, value] of Object.entries(data)) {
+        const baseName = key.replace(/^group_\d+_/, '')
+        if (fileFieldNames.has(baseName) && value instanceof FileList && value.length > 0) {
+          data[key] = await uploadFileField(value[0])
+        }
+      }
+
       // If form doesn't allow groups, use original logic
       if (!form.is_allow_group || groupFields.length === 0) {
         const answers = Object.entries(data).map(([fieldName, value]) => ({
