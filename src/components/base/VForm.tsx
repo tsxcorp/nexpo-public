@@ -114,6 +114,7 @@ function VForm(props: FormProps) {
   async function uploadFileField(file: File): Promise<string> {
     const fd = new FormData()
     fd.append('file', file, file.name)
+    if (props.form.event_id) fd.append('event_id', String(props.form.event_id))
     const res = await fetch('/api/upload', { method: 'POST', body: fd })
     if (!res.ok) throw new Error('File upload failed')
     const { id } = await res.json()

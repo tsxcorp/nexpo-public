@@ -1,28 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const DIRECTUS_URL = process.env.NEXT_PUBLIC_DIRECTUS_URL || 'https://app.nexpo.vn'
-const ADMIN_TOKEN = process.env.DIRECTUS_ADMIN_TOKEN
+// Fallback folder when event has no folder_uploads_id yet (public create permission scoped to this)
+const PUBLIC_UPLOADS_FOLDER = 'b172eef3-09b3-4dff-9046-ced2ed6679d2'
+
+async function getEventUploadFolder(eventId: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `${DIRECTUS_URL}/items/events/${eventId}?fields=folder_uploads_id`,
+      { next: { revalidate: 3600 } }
+    )
+    if (!res.ok) return null
+    const data = await res.json()
+    return (data?.data?.folder_uploads_id as string | null) ?? null
+  } catch {
+    return null
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
-    if (!ADMIN_TOKEN) {
-      return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
-    }
-
     const formData = await req.formData()
     const file = formData.get('file') as File | null
+    const eventId = formData.get('event_id') as string | null
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Upload to Directus files collection
+    // Resolve target folder: event's uploads/ folder → fallback to 4. Uploads
+    let folderId = PUBLIC_UPLOADS_FOLDER
+    if (eventId) {
+      const eventFolder = await getEventUploadFolder(eventId)
+      if (eventFolder) folderId = eventFolder
+    }
+
     const upload = new FormData()
+    upload.append('folder', folderId)
     upload.append('file', file, file.name)
 
     const response = await fetch(`${DIRECTUS_URL}/files`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
       body: upload,
     })
 
