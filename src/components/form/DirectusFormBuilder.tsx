@@ -170,40 +170,40 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
     case 'file':
     case 'image': {
       const isImage = (element.$formkit || element.type) === 'image';
-      console.log(`DirectusFormBuilder - Rendering ${isImage ? 'image' : 'file'} field`);
-      
       const fileValue = hookForm.watch(element.name);
-      const hasFile = fileValue && fileValue.length > 0;
-      
+      const hasFile = fileValue instanceof FileList && fileValue.length > 0;
+      const urlValue = typeof fileValue === 'string' && (fileValue.startsWith('http://') || fileValue.startsWith('https://')) ? fileValue : '';
+
       return (
         <div className="space-y-2">
+          {/* File upload */}
           <div className="relative">
-            <input 
+            <input
               {...commonProps}
               type="file"
-              accept={isImage ? "image/*" : undefined}
+              accept={isImage ? 'image/*' : undefined}
               className={cn(
-                commonProps.className, 
+                commonProps.className,
                 'file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-primary)] file:text-white hover:file:bg-[var(--color-primary)]/90 cursor-pointer'
               )}
               {...register(element.name, {
-                required: isRequired ? 'Please upload a file' : false,
-                validate: (value: FileList | undefined) => {
-                  if (isRequired && (!value || value.length === 0)) {
+                required: isRequired && !urlValue ? 'Please upload a file' : false,
+                validate: (value: FileList | string | undefined) => {
+                  if (isRequired && !urlValue && (!value || (value instanceof FileList && value.length === 0))) {
                     return 'This field is required';
                   }
                   return true;
-                }
+                },
               })}
             />
           </div>
-          
-          {/* Image Preview */}
+
+          {/* Image preview from file */}
           {isImage && hasFile && fileValue[0] instanceof File && (
             <div className="mt-2 relative w-40 h-40 border rounded-md overflow-hidden bg-gray-50">
-              <Image 
-                src={URL.createObjectURL(fileValue[0])} 
-                alt="Preview" 
+              <Image
+                src={URL.createObjectURL(fileValue[0])}
+                alt="Preview"
                 fill
                 className="object-cover"
                 unoptimized
@@ -211,11 +211,42 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
               />
             </div>
           )}
-          
-          {/* File Name Display for non-image or just info */}
           {hasFile && (
             <div className="text-xs text-gray-500">
               Selected: {fileValue[0]?.name} ({(fileValue[0]?.size / 1024).toFixed(1)} KB)
+            </div>
+          )}
+
+          {/* Separator */}
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-px bg-gray-300" />
+            <span className="text-xs text-gray-400">or paste URL</span>
+            <div className="flex-1 h-px bg-gray-300" />
+          </div>
+
+          {/* URL input */}
+          <input
+            type="url"
+            value={urlValue}
+            placeholder="https://..."
+            disabled={commonProps.disabled}
+            className={commonProps.className}
+            style={commonProps.style}
+            onChange={(e) => {
+              hookForm.setValue(element.name, e.target.value, { shouldValidate: true });
+            }}
+          />
+          {/* URL preview */}
+          {urlValue && (
+            <div className="space-y-1">
+              {isImage && (
+                <div className="relative w-40 h-40 border rounded-md overflow-hidden bg-gray-50">
+                  <Image src={urlValue} alt="Preview" fill className="object-cover" unoptimized />
+                </div>
+              )}
+              <a href={urlValue} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 truncate block">
+                {urlValue}
+              </a>
             </div>
           )}
         </div>
