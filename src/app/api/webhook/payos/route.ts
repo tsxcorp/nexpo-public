@@ -76,6 +76,20 @@ export async function POST(req: Request) {
         } as never)
       )
 
+      // Upgrade all reserved tickets to issued
+      const orderTickets = await adminDirectus.request(
+        readItems('issued_tickets' as never, {
+          filter: { order_id: { _eq: order.id }, status: { _eq: 'reserved' } } as never,
+          fields: ['id'] as never,
+          limit: 200,
+        })
+      ) as any[]
+      for (const t of orderTickets) {
+        await adminDirectus.request(
+          updateItem('issued_tickets' as never, t.id as never, { status: 'issued' } as never)
+        )
+      }
+
       // Fire and forget post-payment notifications
       void triggerPostPaymentFlow(order)
       return new Response('OK')
@@ -146,12 +160,12 @@ async function triggerPostPaymentFlow(order: any) {
     const sites = await adminDirectus.request(
       readItems('sites' as never, {
         filter: { event_id: { _eq: order.event_id } } as never,
-        fields: ['slug'] as never,
+        fields: ['slug', 'lang'] as never,
         limit: 1,
       })
     ) as any[]
     const siteSlug = sites[0]?.slug ?? ''
-    const lang = 'vi'
+    const lang = sites[0]?.lang ?? 'vi'
 
     const registrationMode = issuedTickets[0]?.ticket_class_id?.registration_mode ?? 'none'
     const eventName = event?.name ?? 'Sự kiện'

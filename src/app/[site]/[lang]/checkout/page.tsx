@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import { notFound } from 'next/navigation'
 import { getSite } from '@/directus/queries/sites'
 import { fetchNavigationSafe } from '@/directus/queries/navigation'
 import TheHeader from '@/components/navigation/TheHeader'
@@ -22,9 +23,26 @@ async function fetchTicketClass(classId: string) {
     return await serverDirectus.request(readItem('ticket_classes' as never, classId as never, {
       fields: [
         'id', 'name', 'price', 'currency', 'quantity_total',
-        'quantity_sold', 'max_per_order', 'registration_mode',
+        'quantity_sold', 'max_per_order', 'registration_mode', 'event_id',
+        'form_id', 'form_timing',
       ] as never,
     })) as any
+  } catch {
+    return null
+  }
+}
+
+/** Fetch form by ID with fields for checkout rendering. */
+async function fetchFormById(formId: string) {
+  try {
+    const { readItems } = await import('@directus/sdk')
+    const fields = await serverDirectus.request(readItems('form_fields' as never, {
+      filter: { form_id: { _eq: formId } } as never,
+      fields: ['id', 'name', 'type', 'is_required', 'is_email_contact', 'is_name_field', 'is_phone_field', 'translations.languages_code', 'translations.label', 'translations.placeholder', 'translations.options'] as never,
+      sort: ['sort'] as never,
+      limit: 50,
+    })) as any[]
+    return { id: formId, fields }
   } catch {
     return null
   }
@@ -42,6 +60,25 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
     fetchNavigationSafe(site, lang, 'footer'),
     classId ? fetchTicketClass(classId) : Promise.resolve(null),
   ])
+
+  // Gate: check has_ticketing on the event (covers both cart + legacy modes)
+  const eventIdForGate = ticketClass?.event_id ?? (siteData as any)?.event_id
+  if (eventIdForGate) {
+    try {
+      const event = await serverDirectus.request(
+        readItem('events' as never, eventIdForGate as never, { fields: ['has_ticketing'] as never })
+      ) as any
+      if (!event?.has_ticketing) notFound()
+    } catch {
+      notFound()
+    }
+  }
+
+  // Fetch form if ticket class has form_id configured with during_checkout timing
+  const showFormDuringCheckout = ticketClass?.form_timing === 'during_checkout' || ticketClass?.registration_mode === 'buyer_only'
+  const registrationForm = showFormDuringCheckout && ticketClass?.form_id
+    ? await fetchFormById(ticketClass.form_id)
+    : null
 
   const title = lang === 'vi' ? 'Đặt vé' : 'Checkout'
 
@@ -65,7 +102,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
               <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-primary)', borderTopColor: 'transparent' }} />
             </div>
           }>
-            <CheckoutClient site={site} lang={lang} initialTicketClass={ticketClass} />
+            <CheckoutClient site={site} lang={lang} initialTicketClass={ticketClass} registrationForm={registrationForm} />
           </Suspense>
         </div>
       </main>

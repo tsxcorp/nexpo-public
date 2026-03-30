@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { readItems } from '@directus/sdk'
+import { readItem, readItems } from '@directus/sdk'
 import directus from '@/directus/client'
 import { getSite } from '@/directus/queries/sites'
 import { fetchNavigationSafe } from '@/directus/queries/navigation'
@@ -32,6 +32,16 @@ export default async function TicketsPage({ params }: PageProps) {
   const eventId = (siteData as any)?.event_id as number | undefined
   if (!eventId) notFound()
 
+  // Gate: check has_ticketing before showing any tickets
+  try {
+    const event = await directus.request(
+      readItem('events' as never, eventId as never, { fields: ['has_ticketing'] as never })
+    ) as any
+    if (!event?.has_ticketing) notFound()
+  } catch {
+    notFound()
+  }
+
   // Fetch published ticket classes for this event
   let ticketClasses: any[] = []
   try {
@@ -58,6 +68,8 @@ export default async function TicketsPage({ params }: PageProps) {
           'id', 'name', 'description', 'price', 'currency',
           'quantity_total', 'quantity_sold', 'max_per_order',
           'registration_mode', 'sale_start_at', 'sale_end_at',
+          'is_addon', 'requires_class_ids', 'addon_max_per_parent',
+          'benefits.id', 'benefits.label', 'benefits.benefit_type',
         ] as any,
         sort: ['sort', 'date_created'] as any,
         limit: 50,
