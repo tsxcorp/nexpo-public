@@ -2,6 +2,24 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import ClaimFormFields from './ClaimFormFields'
+
+interface FormField {
+  id: string
+  name: string
+  type: string
+  is_required?: boolean
+  is_email_contact?: boolean
+  is_name_field?: boolean
+  is_phone_field?: boolean
+  options?: Array<{ label: string; value: string }>
+  translations?: Array<{
+    languages_code: string
+    label?: string
+    placeholder?: string
+    options?: Array<{ label: string; value: string }>
+  }>
+}
 
 interface Props {
   ticket: {
@@ -12,18 +30,24 @@ interface Props {
     ticket_class_id: string
     registration_id: string | null
   }
-  form: any | null
+  ticketClassForm: { id: string; fields: FormField[] } | null
   site: string
   lang: string
   registrationId: string | null
 }
 
-export default function ClaimClient({ ticket, site, lang, registrationId }: Props) {
+export default function ClaimClient({ ticket, ticketClassForm, site, lang, registrationId }: Props) {
   const router = useRouter()
   const isVI = lang === 'vi'
 
+  const formFields = ticketClassForm?.fields ?? []
+  const formHasContact = formFields.some(f => f.is_email_contact)
+  // Show fallback name/email when no form OR form lacks contact tags
+  const showSimpleFields = !ticketClassForm || !formHasContact
+
   const [name, setName] = useState(ticket.holder_name ?? '')
   const [email, setEmail] = useState(ticket.holder_email ?? '')
+  const [formAnswers, setFormAnswers] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -34,8 +58,8 @@ export default function ClaimClient({ ticket, site, lang, registrationId }: Prop
     email: 'Email',
     submit: isVI ? 'Nhận vé' : 'Claim Ticket',
     loading: isVI ? 'Đang xử lý...' : 'Processing...',
-    success: isVI ? 'Đã nhận vé! Đang chuyển hướng...' : 'Ticket claimed! Redirecting...',
     err_required: isVI ? 'Vui lòng điền đủ tên và email.' : 'Name and email are required.',
+    err_required_fields: isVI ? 'Vui lòng điền đủ các trường bắt buộc.' : 'Please fill in all required fields.',
     err_general: isVI ? 'Đã có lỗi. Vui lòng thử lại.' : 'Something went wrong. Please try again.',
     already_used: isVI ? 'Vé này đã được sử dụng.' : 'This ticket has already been used.',
   }
@@ -49,11 +73,42 @@ export default function ClaimClient({ ticket, site, lang, registrationId }: Prop
     )
   }
 
+  const validate = (): boolean => {
+    if (showSimpleFields && (!name.trim() || !email.trim())) {
+      setError(T.err_required)
+      return false
+    }
+    const missing = formFields.some(f => f.is_required && !(formAnswers[f.name] ?? '').trim())
+    if (missing) {
+      setError(T.err_required_fields)
+      return false
+    }
+    return true
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim() || !email.trim()) { setError(T.err_required); return }
+    if (!validate()) return
     setSubmitting(true)
     setError(null)
+
+    // Derive contact from tagged form fields when form has contact tags
+    let derivedName = name.trim()
+    let derivedEmail = email.trim()
+    if (ticketClassForm && formFields.length > 0) {
+      const nameFields = formFields.filter(f => f.is_name_field)
+      if (nameFields.length > 0) {
+        const joined = nameFields.map(f => formAnswers[f.name] ?? '').filter(Boolean).join(' ')
+        if (joined) derivedName = joined
+      }
+      const emailField = formFields.find(f => f.is_email_contact)
+      if (emailField) derivedEmail = formAnswers[emailField.name] ?? email.trim()
+    }
+
+    // Build form_answers payload: [{ field: field.id, value }]
+    const formAnswersPayload = ticketClassForm
+      ? formFields.map(f => ({ field: f.id, value: formAnswers[f.name] ?? '' })).filter(a => a.value !== '')
+      : []
 
     try {
       const res = await fetch('/api/claim', {
@@ -62,15 +117,17 @@ export default function ClaimClient({ ticket, site, lang, registrationId }: Prop
         body: JSON.stringify({
           ticket_id: ticket.id,
           registration_id: registrationId,
-          name: name.trim(),
-          email: email.trim(),
+          name: derivedName,
+          email: derivedEmail,
           site_slug: site,
           lang,
+          ...(ticketClassForm && formAnswersPayload.length > 0
+            ? { form_id: ticketClassForm.id, form_answers: formAnswersPayload }
+            : {}),
         }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? T.err_general); return }
-      // Redirect to insight
       if (data.registration_id) {
         router.push(`https://insights.nexpo.vn/${data.registration_id}`)
       }
@@ -96,29 +153,47 @@ export default function ClaimClient({ ticket, site, lang, registrationId }: Prop
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {T.name}<span className="text-red-500 ml-0.5">*</span>
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2"
-            style={{ '--tw-ring-color': 'var(--color-primary)' } as any}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {T.email}<span className="text-red-500 ml-0.5">*</span>
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2"
-          />
-        </div>
+        {/* Simple name/email — shown when no form or form lacks contact tags */}
+        {showSimpleFields && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {T.name}<span className="text-red-500 ml-0.5">*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2"
+                style={{ '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {T.email}<span className="text-red-500 ml-0.5">*</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2"
+                style={{ '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Dynamic form fields from ticket class */}
+        {formFields.length > 0 && (
+          <div className={showSimpleFields ? 'pt-4 border-t border-gray-100 space-y-4' : 'space-y-4'}>
+            <ClaimFormFields
+              fields={formFields}
+              answers={formAnswers}
+              onChange={(fieldName: string, value: string) => setFormAnswers(prev => ({ ...prev, [fieldName]: value }))}
+              lang={lang}
+            />
+          </div>
+        )}
 
         <button
           type="submit"

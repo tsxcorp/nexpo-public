@@ -63,22 +63,31 @@ export default async function ClaimPage({ params }: PageProps) {
     } catch { /* ignore */ }
   }
 
-  // Fetch registration form for this event
-  let form: any = null
-  try {
-    const forms = await adminDirectus.request(
-      readItems('forms' as never, {
-        filter: {
-          event_id: { _eq: eventId },
-          is_registration: { _eq: true },
-          status: { _eq: 'published' },
-        } as never,
-        fields: ['*', 'fields.*', 'fields.translations.*', 'translations.*'] as never,
-        limit: 1,
-      })
-    ) as any[]
-    form = forms[0] ?? null
-  } catch { /* no form — claim still works just with holder info */ }
+  // Fetch ticket class form config (preferred over event-level form)
+  let ticketClassForm: { id: string; fields: any[] } | null = null
+  if (ticket.ticket_class_id) {
+    try {
+      const tc = await adminDirectus.request(
+        readItem('ticket_classes' as never, ticket.ticket_class_id as never, {
+          fields: ['form_id'] as never,
+        })
+      ) as any
+      if (tc?.form_id) {
+        const fields = await adminDirectus.request(
+          readItems('form_fields' as never, {
+            filter: { form_id: { _eq: tc.form_id } } as never,
+            fields: [
+              'id', 'name', 'type', 'is_required', 'is_email_contact', 'is_name_field', 'is_phone_field',
+              'translations.languages_code', 'translations.label', 'translations.placeholder', 'translations.options',
+            ] as never,
+            sort: ['sort'] as never,
+            limit: 50,
+          })
+        ) as any[]
+        ticketClassForm = { id: tc.form_id, fields: fields ?? [] }
+      }
+    } catch { /* no form — claim still works with simple mode */ }
+  }
 
   return (
     <>
@@ -94,7 +103,7 @@ export default async function ClaimPage({ params }: PageProps) {
         <div className="max-w-lg mx-auto">
           <ClaimClient
             ticket={ticket}
-            form={form}
+            ticketClassForm={ticketClassForm}
             site={site}
             lang={lang}
             registrationId={ticket.registration_id ?? null}
