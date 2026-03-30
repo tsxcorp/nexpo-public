@@ -272,6 +272,8 @@ function VForm(props: FormProps) {
 
       setSuccess(true)
       if (form.on_success === 'redirect' && form.redirect_url) {
+        // Phase 3.8: substitute {{registration_id}} from API response
+        // The submitForm handler needs to read the API response for this.
         return router.push(form.redirect_url)
       }
     } catch (err) {

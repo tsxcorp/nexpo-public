@@ -92,9 +92,10 @@ src/
 └── types/                — TypeScript interfaces
 ```
 
-## 🎟️ Ticketing System (Coming)
+## 🎟️ Ticketing System (✅ Phase 3 Done)
 
-> Full schema & plan: `nexpo-platform/.claude/ticketing-schema.md`
+> Schema + implementation: `nexpo-platform/.claude/modules/ticketing-impl.md`
+> Backlog: `triggerPostPaymentFlow()` (paid ticket email sau PayOS webhook) — xem backlog.md
 
 ### Routes mới (dedicated — KHÔNG phải page builder blocks)
 
