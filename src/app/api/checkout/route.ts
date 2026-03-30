@@ -211,10 +211,7 @@ export async function POST(req: NextRequest) {
     const payosClient = new PayOSClient({ clientId: creds.client_id, apiKey: creds.api_key, checksumKey: creds.checksum_key })
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL!
-    const desc = classData.length === 1
-      ? `Ve ${classData[0].name ?? 'su kien'}`.slice(0, 25)
-      : `${classData.length} loai ve`.slice(0, 25)
-    const description = desc.replace(/[^\w\s]/g, '')
+    const description = `Order ${payosOrderCode}`.slice(0, 25)
 
     const { checkoutUrl } = await payosClient.paymentRequests.create({
       orderCode: payosOrderCode, amount: totalAmount, description,
