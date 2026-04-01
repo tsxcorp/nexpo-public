@@ -52,7 +52,6 @@ export async function POST(req: Request) {
     if (!configs[0]) return new Response('OK')
 
     const creds = configs[0].credentials ?? {}
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PayOS: PayOSClient } = require('@payos/node') as { PayOS: new (opts: Record<string, string>) => { webhooks: { verify: (data: unknown) => Promise<void> } } }
     const payosClient = new PayOSClient({ clientId: creds.client_id, apiKey: creds.api_key, checksumKey: creds.checksum_key })
 

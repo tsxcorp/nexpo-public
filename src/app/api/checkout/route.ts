@@ -248,7 +248,6 @@ export async function POST(req: NextRequest) {
     )
 
     if (selectedProvider.provider === 'payos') {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { PayOS: PayOSClient } = require('@payos/node') as { PayOS: new (opts: Record<string, string>) => { paymentRequests: { create: (data: Record<string, unknown>) => Promise<{ checkoutUrl: string }> } } }
       const payosClient = new PayOSClient({ clientId: creds.client_id, apiKey: creds.api_key, checksumKey: creds.checksum_key })
       const description = `Order ${payosOrderCode}`.slice(0, 25)
