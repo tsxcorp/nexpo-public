@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { initTranslations } from '@/i18n/i18n';
 import type { EventBasicInfo } from '@/directus/types';
 
 interface EventInfoBlockData {
@@ -28,10 +29,12 @@ function formatDateLong(dateStr: string | null | undefined, lang: string): strin
   }
 }
 
-export default function EventInfoBlock({ data, lang, event, registerUrl }: Props) {
+export default async function EventInfoBlock({ data, lang, event, registerUrl }: Props) {
   if (!event) return null;
 
-  const title = data.translations?.find(t => t.languages_code?.startsWith(lang))?.title
+  const { t } = await initTranslations(lang);
+
+  const title = data.translations?.find(tr => tr.languages_code?.startsWith(lang))?.title
     || data.translations?.[0]?.title;
 
   const showDate = data.show_date !== false;
@@ -57,7 +60,7 @@ export default function EventInfoBlock({ data, lang, event, registerUrl }: Props
               <span className="text-2xl flex-shrink-0">📅</span>
               <div>
                 <p className="text-xs font-semibold uppercase text-gray-400 tracking-wider mb-0.5">
-                  {lang === 'vi' ? 'Thời gian' : 'Date & Time'}
+                  {t('event_info.date_label')}
                 </p>
                 <p className="text-sm font-semibold text-gray-900">{dateStr}</p>
               </div>
@@ -68,7 +71,7 @@ export default function EventInfoBlock({ data, lang, event, registerUrl }: Props
               <span className="text-2xl flex-shrink-0">📍</span>
               <div>
                 <p className="text-xs font-semibold uppercase text-gray-400 tracking-wider mb-0.5">
-                  {lang === 'vi' ? 'Địa điểm' : 'Location'}
+                  {t('event_info.location_label')}
                 </p>
                 <p className="text-sm font-semibold text-gray-900">{event.location}</p>
               </div>
@@ -79,7 +82,7 @@ export default function EventInfoBlock({ data, lang, event, registerUrl }: Props
               <span className="text-2xl flex-shrink-0">🏢</span>
               <div>
                 <p className="text-xs font-semibold uppercase text-gray-400 tracking-wider mb-0.5">
-                  {lang === 'vi' ? 'Sự kiện' : 'Event'}
+                  {t('event_info.event_label')}
                 </p>
                 <p className="text-sm font-semibold text-gray-900">{event.name}</p>
               </div>
@@ -94,7 +97,7 @@ export default function EventInfoBlock({ data, lang, event, registerUrl }: Props
               className="inline-block px-8 py-3 rounded-full text-white font-bold text-sm shadow-md hover:opacity-90 transition-opacity"
               style={{ backgroundColor: 'var(--color-primary)' }}
             >
-              {lang === 'vi' ? 'Đăng ký tham dự' : 'Register Now'}
+              {t('event_info.register_cta')}
             </Link>
           </div>
         )}

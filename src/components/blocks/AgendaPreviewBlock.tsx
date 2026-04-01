@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { initTranslations } from '@/i18n/i18n';
 import type { AgendaSession } from '@/directus/types';
 
 interface AgendaPreviewBlockData {
@@ -20,8 +21,10 @@ function formatTime(time: string | null | undefined): string {
   return time.slice(0, 5); // HH:MM
 }
 
-export default function AgendaPreviewBlock({ data, lang, agendaSessions, agendaUrl }: Props) {
-  const title = data.translations?.find(t => t.languages_code?.startsWith(lang))?.title
+export default async function AgendaPreviewBlock({ data, lang, agendaSessions, agendaUrl }: Props) {
+  const { t } = await initTranslations(lang);
+
+  const title = data.translations?.find(tr => tr.languages_code?.startsWith(lang))?.title
     || data.translations?.[0]?.title;
 
   const featured = agendaSessions.filter(s => s.is_featured || s.status === 'published');
@@ -39,7 +42,7 @@ export default function AgendaPreviewBlock({ data, lang, agendaSessions, agendaU
         )}
         <div className="space-y-3">
           {items.map(session => {
-            const trans = session.translations?.find(t => t.languages_code?.startsWith(lang))
+            const trans = session.translations?.find(tr => tr.languages_code?.startsWith(lang))
               || session.translations?.[0];
             const sessionTitle = trans?.title || '';
             const start = formatTime(session.start_time);
@@ -87,7 +90,7 @@ export default function AgendaPreviewBlock({ data, lang, agendaSessions, agendaU
               className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
               style={{ color: 'var(--color-primary)' }}
             >
-              {lang === 'vi' ? 'Xem tất cả chương trình' : 'View full agenda'} →
+              {t('agenda_preview.view_all')} →
             </Link>
           </div>
         )}

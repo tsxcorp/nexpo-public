@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, Loader2, XCircle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface Props { site: string; lang: string }
 
 export default function CheckoutSuccessClient({ site, lang }: Props) {
   const searchParams = useSearchParams()
   const orderId = searchParams.get('order')
-  const isVI = lang === 'vi'
+  const { t } = useTranslation()
 
   const [status, setStatus] = useState<'loading' | 'paid' | 'pending' | 'error'>('loading')
   const [attempts, setAttempts] = useState(0)
@@ -45,7 +46,7 @@ export default function CheckoutSuccessClient({ site, lang }: Props) {
       <div className="flex flex-col items-center gap-4 py-24">
         <Loader2 size={40} className="animate-spin" style={{ color: 'var(--color-primary)' }} />
         <p className="text-gray-500 text-sm">
-          {isVI ? 'Đang xác nhận thanh toán...' : 'Confirming payment...'}
+          {t('checkout_success.confirming')}
         </p>
       </div>
     )
@@ -56,19 +57,17 @@ export default function CheckoutSuccessClient({ site, lang }: Props) {
       <div className="flex flex-col items-center gap-4 py-24 text-center">
         <CheckCircle size={56} className="text-green-500" />
         <h1 className="text-2xl font-bold text-gray-900">
-          {isVI ? 'Đặt vé thành công! 🎉' : 'Booking confirmed! 🎉'}
+          {t('checkout_success.confirmed_title')}
         </h1>
         <p className="text-gray-500 max-w-sm">
-          {isVI
-            ? 'Vé của bạn đã được xác nhận. Kiểm tra email để nhận mã QR.'
-            : 'Your ticket is confirmed. Check your email for the QR code.'}
+          {t('checkout_success.confirmed_body')}
         </p>
         <Link
           href={`/${site}/${lang}/tickets`}
           className="mt-4 px-6 py-2.5 rounded-xl text-sm font-semibold text-white"
           style={{ background: 'var(--color-primary)' }}
         >
-          {isVI ? 'Xem vé khác' : 'Browse more tickets'}
+          {t('checkout_success.browse_more')}
         </Link>
       </div>
     )
@@ -79,12 +78,10 @@ export default function CheckoutSuccessClient({ site, lang }: Props) {
       <div className="flex flex-col items-center gap-4 py-24 text-center">
         <Loader2 size={48} style={{ color: 'var(--color-primary)' }} />
         <h1 className="text-2xl font-bold text-gray-900">
-          {isVI ? 'Đang chờ xác nhận' : 'Payment being processed'}
+          {t('checkout_success.processing_title')}
         </h1>
         <p className="text-gray-500 max-w-sm">
-          {isVI
-            ? 'Thanh toán đang được xử lý. Bạn sẽ nhận email xác nhận sớm.'
-            : 'Your payment is being processed. You will receive a confirmation email shortly.'}
+          {t('checkout_success.processing_body')}
         </p>
       </div>
     )
@@ -93,7 +90,7 @@ export default function CheckoutSuccessClient({ site, lang }: Props) {
   return (
     <div className="flex flex-col items-center gap-4 py-24 text-center">
       <XCircle size={48} className="text-red-400" />
-      <p className="text-gray-500">{isVI ? 'Không tìm thấy đơn vé.' : 'Order not found.'}</p>
+      <p className="text-gray-500">{t('checkout_success.not_found')}</p>
     </div>
   )
 }

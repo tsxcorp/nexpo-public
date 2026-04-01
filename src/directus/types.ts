@@ -360,6 +360,8 @@ export interface FormField {
   is_required?: boolean;
   is_group_field?: boolean;
   is_email_contact?: boolean;
+  is_name_field?: boolean;
+  is_phone_field?: boolean;
   event_id?: number;
   tenant_id?: number;
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getSite } from '@/directus/queries/sites'
 import { fetchAgendaSessions, fetchAgendaTracks } from '@/directus/queries/agenda'
 import { fetchNavigationSafe } from '@/directus/queries/navigation'
+import { initTranslations } from '@/i18n/i18n'
 import TheHeader from '@/components/navigation/TheHeader'
 import TheFooter from '@/components/navigation/TheFooter'
 import AgendaClient from './AgendaClient'
@@ -9,8 +10,8 @@ import type { PageProps } from '@/types/next'
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { site, lang } = await params
-  const siteData = await getSite(site)
-  const title = lang === 'vi' ? 'Lịch chương trình' : 'Agenda'
+  const [siteData, { t }] = await Promise.all([getSite(site), initTranslations(lang)])
+  const title = t('agenda.page_title')
   return {
     title: siteData?.name ? `${title} — ${siteData.name}` : title,
     robots: { index: true, follow: true },
@@ -21,10 +22,11 @@ export default async function AgendaPage({ params }: PageProps) {
   const { site, lang } = await params
   const currentPathname = `/${site}/${lang}/agenda`
 
-  const [siteData, mainNav, footerNav] = await Promise.all([
+  const [siteData, mainNav, footerNav, { t }] = await Promise.all([
     getSite(site),
     fetchNavigationSafe(site, lang, 'header'),
     fetchNavigationSafe(site, lang, 'footer'),
+    initTranslations(lang),
   ])
 
   const eventId = (siteData as any)?.event_id as number | undefined
@@ -32,10 +34,13 @@ export default async function AgendaPage({ params }: PageProps) {
     ? await Promise.all([fetchAgendaSessions(eventId), fetchAgendaTracks(eventId)])
     : [[], []]
 
-  const t =
-    lang === 'vi'
-      ? { page_title: 'Lịch chương trình', all_days: 'Tất cả ngày', day: 'Ngày', all_tracks: 'Tất cả track', no_sessions: 'Chưa có lịch chương trình' }
-      : { page_title: 'Agenda', all_days: 'All days', day: 'Day', all_tracks: 'All tracks', no_sessions: 'No sessions scheduled' }
+  const tProp = {
+    page_title: t('agenda.page_title'),
+    all_days: t('agenda.all_days'),
+    day: t('agenda.day'),
+    all_tracks: t('agenda.all_tracks'),
+    no_sessions: t('agenda.no_sessions'),
+  }
 
   return (
     <>
@@ -55,16 +60,16 @@ export default async function AgendaPage({ params }: PageProps) {
               className="text-3xl font-bold"
               style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)' }}
             >
-              {t.page_title}
+              {tProp.page_title}
             </h1>
             {sessions.length > 0 && (
               <p className="mt-2 text-sm text-gray-500">
-                {sessions.length} {lang === 'vi' ? 'phiên' : 'sessions'}
+                {sessions.length} {t('agenda.sessions')}
               </p>
             )}
           </div>
 
-          <AgendaClient sessions={sessions} tracks={tracks} lang={lang} t={t} />
+          <AgendaClient sessions={sessions} tracks={tracks} lang={lang} t={tProp} />
         </div>
       </main>
 

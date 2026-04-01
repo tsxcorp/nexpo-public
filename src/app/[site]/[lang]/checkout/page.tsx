@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { getSite } from '@/directus/queries/sites'
 import { fetchNavigationSafe } from '@/directus/queries/navigation'
+import { initTranslations } from '@/i18n/i18n'
 import TheHeader from '@/components/navigation/TheHeader'
 import TheFooter from '@/components/navigation/TheFooter'
 import type { PageProps } from '@/types/next'
@@ -54,11 +55,12 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
   const classId = typeof sp.class === 'string' ? sp.class : ''
   const currentPathname = `/${site}/${lang}/checkout`
 
-  const [siteData, mainNav, footerNav, ticketClass] = await Promise.all([
+  const [siteData, mainNav, footerNav, ticketClass, { t }] = await Promise.all([
     getSite(site),
     fetchNavigationSafe(site, lang, 'header'),
     fetchNavigationSafe(site, lang, 'footer'),
     classId ? fetchTicketClass(classId) : Promise.resolve(null),
+    initTranslations(lang),
   ])
 
   // Gate: check has_ticketing on the event (covers both cart + legacy modes)
@@ -80,8 +82,6 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
     ? await fetchFormById(ticketClass.form_id)
     : null
 
-  const title = lang === 'vi' ? 'Đặt vé' : 'Checkout'
-
   return (
     <>
       <TheHeader
@@ -95,7 +95,7 @@ export default async function CheckoutPage({ params, searchParams }: PageProps) 
       <main className="min-h-screen bg-gray-50 py-12 px-4">
         <div className="max-w-lg mx-auto">
           <h1 className="text-2xl font-bold text-center mb-8" style={{ color: 'var(--color-primary)' }}>
-            {title}
+            {t('checkout.page_title')}
           </h1>
           <Suspense fallback={
             <div className="flex justify-center py-24">

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getSite } from '@/directus/queries/sites'
 import { fetchSpeakers } from '@/directus/queries/speakers'
 import { fetchNavigationSafe } from '@/directus/queries/navigation'
+import { initTranslations } from '@/i18n/i18n'
 import TheHeader from '@/components/navigation/TheHeader'
 import TheFooter from '@/components/navigation/TheFooter'
 import SpeakersClient from './SpeakersClient'
@@ -9,8 +10,8 @@ import type { PageProps } from '@/types/next'
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { site, lang } = await params
-  const siteData = await getSite(site)
-  const title = lang === 'vi' ? 'Diễn giả' : 'Speakers'
+  const [siteData, { t }] = await Promise.all([getSite(site), initTranslations(lang)])
+  const title = t('speakers.page_title')
   return {
     title: siteData?.name ? `${title} — ${siteData.name}` : title,
     robots: { index: true, follow: true },
@@ -21,19 +22,21 @@ export default async function SpeakersPage({ params }: PageProps) {
   const { site, lang } = await params
   const currentPathname = `/${site}/${lang}/speakers`
 
-  const [siteData, mainNav, footerNav] = await Promise.all([
+  const [siteData, mainNav, footerNav, { t }] = await Promise.all([
     getSite(site),
     fetchNavigationSafe(site, lang, 'header'),
     fetchNavigationSafe(site, lang, 'footer'),
+    initTranslations(lang),
   ])
 
   const eventId = (siteData as any)?.event_id as number | undefined
   const speakers = eventId ? await fetchSpeakers(eventId) : []
 
-  const t =
-    lang === 'vi'
-      ? { page_title: 'Diễn giả', search_placeholder: 'Tìm kiếm diễn giả...', no_speakers: 'Chưa có thông tin diễn giả' }
-      : { page_title: 'Speakers', search_placeholder: 'Search speakers...', no_speakers: 'No speakers yet' }
+  const tProp = {
+    page_title: t('speakers.page_title'),
+    search_placeholder: t('speakers.search_placeholder'),
+    no_speakers: t('speakers.no_speakers'),
+  }
 
   return (
     <>
@@ -53,16 +56,16 @@ export default async function SpeakersPage({ params }: PageProps) {
               className="text-3xl font-bold"
               style={{ fontFamily: 'var(--font-display)', color: 'var(--color-primary)' }}
             >
-              {t.page_title}
+              {tProp.page_title}
             </h1>
             {speakers.length > 0 && (
               <p className="mt-2 text-sm text-gray-500">
-                {speakers.length} {lang === 'vi' ? 'diễn giả' : 'speakers'}
+                {speakers.length} {t('speakers.speakers_count')}
               </p>
             )}
           </div>
 
-          <SpeakersClient speakers={speakers} lang={lang} t={t} />
+          <SpeakersClient speakers={speakers} lang={lang} t={tProp} />
         </div>
       </main>
 

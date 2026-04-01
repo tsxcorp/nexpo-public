@@ -42,7 +42,8 @@
     "website": "Website",
     "no_results": "No exhibitors found",
     "featured": "Featured",
-    "view_all": "View all exhibitors"
+    "view_all": "View all exhibitors",
+    "participants": "participants"
   },
   "agenda": {
     "page_title": "Agenda",
@@ -50,13 +51,15 @@
     "day": "Day",
     "all_tracks": "All tracks",
     "no_sessions": "No sessions scheduled",
-    "view_all": "View full agenda"
+    "view_all": "View full agenda",
+    "sessions": "sessions"
   },
   "speakers": {
     "page_title": "Speakers",
     "no_speakers": "No speakers yet",
     "view_all": "View all speakers",
-    "search_placeholder": "Search speakers..."
+    "search_placeholder": "Search speakers...",
+    "speakers_count": "speakers"
   },
   "posts": {
     "page_title": "All Posts",
@@ -65,5 +68,107 @@
     "featured": "Featured Article",
     "latest": "Latest & Greatest",
     "category_for": "Articles For Category: "
+  },
+  "register": {
+    "title": "Register",
+    "not_found": "Registration form is not available yet."
+  },
+  "checkout": {
+    "page_title": "Checkout",
+    "step1": "Cart",
+    "step2": "Your Info",
+    "step3": "Confirm & Pay",
+    "next": "Continue",
+    "back": "Back",
+    "confirm": "Confirm & Book",
+    "loading": "Processing...",
+    "qty": "Quantity",
+    "name": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "holder_info": "Companion Info",
+    "total": "Total",
+    "free": "Free",
+    "per_ticket": "Ticket",
+    "empty_cart": "Your cart is empty.",
+    "err_required": "Please fill in all required fields.",
+    "err_general": "Something went wrong. Please try again.",
+    "your_tickets": "Your Tickets",
+    "registration_info": "Registration Info",
+    "order_summary": "Order Summary",
+    "buyer": "Buyer",
+    "payos_redirect": "You will be redirected to PayOS payment page.",
+    "promo_code": "Promo code",
+    "apply": "Apply",
+    "discount": "Discount",
+    "full_name": "Full Name",
+    "full_name_placeholder": "John Doe",
+    "phone_placeholder": "+84...",
+    "companion_name": "Companion's name",
+    "companion_email": "Companion email",
+    "select_placeholder": "Select...",
+    "err_promo": "Could not validate code."
+  },
+  "checkout_success": {
+    "confirming": "Confirming payment...",
+    "confirmed_title": "Booking confirmed! 🎉",
+    "confirmed_body": "Your ticket is confirmed. Check your email for the QR code.",
+    "browse_more": "Browse more tickets",
+    "processing_title": "Payment being processed",
+    "processing_body": "Your payment is being processed. You will receive a confirmation email shortly.",
+    "not_found": "Order not found."
+  },
+  "checkout_cancel": {
+    "title": "Payment Cancelled",
+    "body": "Your transaction was cancelled. The ticket reservation will be released shortly.",
+    "try_again": "Try again"
+  },
+  "tickets": {
+    "title": "Event Tickets",
+    "subtitle": "Choose the ticket that fits you",
+    "empty": "No tickets are currently available.",
+    "buy_now": "Buy Now",
+    "sold_out": "Sold Out",
+    "free": "Free",
+    "remaining": "remaining",
+    "checkout_btn": "Checkout",
+    "add": "Add",
+    "addons_title": "Add-ons",
+    "addons_subtitle": "Available with a main ticket",
+    "requires_ticket": "Requires ticket",
+    "needs_main_ticket": "Add a main ticket first",
+    "ticket_count": "ticket(s)",
+    "currency": "Currency",
+    "price_not_available": "Price not available in this currency",
+    "unavailable": "Unavailable"
+  },
+  "claim": {
+    "title": "Claim Your Ticket",
+    "subtitle": "Fill in your details to receive your entry QR code.",
+    "name": "Full Name",
+    "email": "Email",
+    "submit": "Claim Ticket",
+    "loading": "Processing...",
+    "err_required": "Name and email are required.",
+    "err_required_fields": "Please fill in all required fields.",
+    "err_general": "Something went wrong. Please try again.",
+    "already_used": "This ticket has already been used.",
+    "select_placeholder": "Select..."
+  },
+  "event_info": {
+    "date_label": "Date & Time",
+    "location_label": "Location",
+    "event_label": "Event",
+    "register_cta": "Register Now"
+  },
+  "agenda_preview": {
+    "view_all": "View full agenda"
+  },
+  "countdown": {
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "started": "The event has started!"
   }
 }

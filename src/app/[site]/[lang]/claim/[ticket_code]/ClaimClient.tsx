@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import ClaimFormFields from './ClaimFormFields'
 
 interface FormField {
@@ -38,7 +39,7 @@ interface Props {
 
 export default function ClaimClient({ ticket, ticketClassForm, site, lang, registrationId }: Props) {
   const router = useRouter()
-  const isVI = lang === 'vi'
+  const { t } = useTranslation()
 
   const formFields = ticketClassForm?.fields ?? []
   const formHasContact = formFields.some(f => f.is_email_contact)
@@ -51,42 +52,29 @@ export default function ClaimClient({ ticket, ticketClassForm, site, lang, regis
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const T = {
-    title: isVI ? 'Nhận vé của bạn' : 'Claim Your Ticket',
-    subtitle: isVI ? 'Điền thông tin để nhận mã QR vào cửa.' : 'Fill in your details to receive your entry QR code.',
-    name: isVI ? 'Họ và tên' : 'Full Name',
-    email: 'Email',
-    submit: isVI ? 'Nhận vé' : 'Claim Ticket',
-    loading: isVI ? 'Đang xử lý...' : 'Processing...',
-    err_required: isVI ? 'Vui lòng điền đủ tên và email.' : 'Name and email are required.',
-    err_required_fields: isVI ? 'Vui lòng điền đủ các trường bắt buộc.' : 'Please fill in all required fields.',
-    err_general: isVI ? 'Đã có lỗi. Vui lòng thử lại.' : 'Something went wrong. Please try again.',
-    already_used: isVI ? 'Vé này đã được sử dụng.' : 'This ticket has already been used.',
-  }
-
   if (ticket.status === 'used') {
     return (
       <div className="text-center py-16">
         <div className="text-5xl mb-4">✅</div>
-        <h1 className="text-xl font-semibold text-gray-700">{T.already_used}</h1>
+        <h1 className="text-xl font-semibold text-gray-700">{t('claim.already_used')}</h1>
       </div>
     )
   }
 
   const validate = (): boolean => {
     if (showSimpleFields && (!name.trim() || !email.trim())) {
-      setError(T.err_required)
+      setError(t('claim.err_required'))
       return false
     }
     const missing = formFields.some(f => f.is_required && !(formAnswers[f.name] ?? '').trim())
     if (missing) {
-      setError(T.err_required_fields)
+      setError(t('claim.err_required_fields'))
       return false
     }
     return true
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!validate()) return
     setSubmitting(true)
@@ -127,12 +115,12 @@ export default function ClaimClient({ ticket, ticketClassForm, site, lang, regis
         }),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error ?? T.err_general); return }
+      if (!res.ok) { setError(data.error ?? t('claim.err_general')); return }
       if (data.registration_id) {
         router.push(`https://insights.nexpo.vn/${data.registration_id}`)
       }
     } catch {
-      setError(T.err_general)
+      setError(t('claim.err_general'))
     } finally {
       setSubmitting(false)
     }
@@ -142,8 +130,8 @@ export default function ClaimClient({ ticket, ticketClassForm, site, lang, regis
     <div>
       <div className="text-center mb-8">
         <div className="text-5xl mb-3">🎟️</div>
-        <h1 className="text-2xl font-bold text-gray-900">{T.title}</h1>
-        <p className="text-gray-500 text-sm mt-2">{T.subtitle}</p>
+        <h1 className="text-2xl font-bold text-gray-900">{t('claim.title')}</h1>
+        <p className="text-gray-500 text-sm mt-2">{t('claim.subtitle')}</p>
       </div>
 
       {error && (
@@ -158,7 +146,7 @@ export default function ClaimClient({ ticket, ticketClassForm, site, lang, regis
           <>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {T.name}<span className="text-red-500 ml-0.5">*</span>
+                {t('claim.name')}<span className="text-red-500 ml-0.5">*</span>
               </label>
               <input
                 type="text"
@@ -170,7 +158,7 @@ export default function ClaimClient({ ticket, ticketClassForm, site, lang, regis
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {T.email}<span className="text-red-500 ml-0.5">*</span>
+                {t('claim.email')}<span className="text-red-500 ml-0.5">*</span>
               </label>
               <input
                 type="email"
@@ -201,7 +189,7 @@ export default function ClaimClient({ ticket, ticketClassForm, site, lang, regis
           className="w-full py-3 rounded-xl text-white font-semibold mt-2 transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{ background: 'var(--color-primary)' }}
         >
-          {submitting ? T.loading : T.submit}
+          {submitting ? t('claim.loading') : t('claim.submit')}
         </button>
       </form>
     </div>

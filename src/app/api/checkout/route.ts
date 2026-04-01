@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     for (const item of items) {
       const tc = await adminDirectus.request(
         readItem('ticket_classes' as never, item.ticket_class_id as never, {
-          fields: ['id', 'name', 'quantity_total', 'quantity_sold', 'price', 'currency', 'registration_mode', 'max_per_order', 'event_id', 'is_addon', 'requires_class_ids'] as never,
+          fields: ['id', 'name', 'quantity_total', 'quantity_sold', 'price', 'currency', 'prices', 'registration_mode', 'max_per_order', 'event_id', 'is_addon', 'requires_class_ids'] as never,
         })
       ) as any
 
@@ -83,9 +83,32 @@ export async function POST(req: NextRequest) {
       readItem('events' as never, event_id as never, { fields: ['id', 'event_code', 'name'] as never })
     ) as any
 
-    // ── 4. Calculate totals ──
-    const totalAmount = classData.reduce((sum, tc) => sum + Number(tc.price) * tc.requestedQty, 0)
-    const currency = classData[0]?.currency ?? 'VND'
+    // ── 3b. Resolve currency + validate ──
+    const requestedCurrency = body.currency as string | undefined
+    // Fetch tenant supported currencies for validation
+    const tenant = await adminDirectus.request(
+      readItem('tenants' as never, tenant_id as never, { fields: ['supported_currencies'] as never })
+    ) as any
+    const supportedCurrencies: string[] = tenant?.supported_currencies ?? ['VND']
+    const currency = requestedCurrency && supportedCurrencies.includes(requestedCurrency)
+      ? requestedCurrency
+      : supportedCurrencies[0] ?? 'VND'
+
+    // ── 4. Calculate totals using resolved currency ──
+    let totalAmount = 0
+    for (const tc of classData) {
+      // Resolve price from multi-currency prices JSON, fallback to legacy fields
+      let resolvedPrice: number
+      if (tc.prices && currency in tc.prices) {
+        resolvedPrice = Number(tc.prices[currency])
+      } else if (tc.currency === currency) {
+        resolvedPrice = Number(tc.price)
+      } else {
+        return NextResponse.json({ error: `Price not available in ${currency} for: ${tc.name}` }, { status: 400 })
+      }
+      tc.resolvedPrice = resolvedPrice
+      totalAmount += resolvedPrice * tc.requestedQty
+    }
     const payosOrderCode = Date.now()
 
     // ── 5. Create ticket_order ──
@@ -107,11 +130,12 @@ export async function POST(req: NextRequest) {
     let holderIdx = 0 // global holder index across all classes
 
     for (const tc of classData) {
-      const itemSubtotal = Number(tc.price) * tc.requestedQty
+      const unitPrice = tc.resolvedPrice ?? Number(tc.price)
+      const itemSubtotal = unitPrice * tc.requestedQty
       const orderItem = await adminDirectus.request(
         createItem('ticket_order_items' as never, {
           order_id: order.id, ticket_class_id: tc.id,
-          quantity: tc.requestedQty, unit_price: tc.price, subtotal: itemSubtotal,
+          quantity: tc.requestedQty, unit_price: unitPrice, subtotal: itemSubtotal,
         } as never)
       ) as any
 
@@ -190,36 +214,52 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, order_id: order.id })
     }
 
-    // ── 7b. Paid → PayOS ──
+    // ── 7b. Paid → Route to payment provider by currency ──
+    // VND → PayOS/VNPay/MoMo/ZaloPay; USD/other → Stripe
+    const vndProviders = ['payos', 'vnpay', 'momo', 'zalopay']
+    const providerFilter = currency === 'VND'
+      ? { provider: { _in: vndProviders } }
+      : { provider: { _eq: 'stripe' } }
+
     const paymentConfigs = await adminDirectus.request(
       readItems('tenant_payment_configs' as never, {
         filter: {
-          tenant_id: { _eq: tenant_id }, provider: { _eq: 'payos' }, is_active: { _eq: true },
+          tenant_id: { _eq: tenant_id }, is_active: { _eq: true },
+          ...providerFilter,
           _or: [{ event_id: { _eq: event_id } }, { event_id: { _null: true } }],
         } as never,
-        sort: ['-event_id'] as never,
-        limit: 2,
+        sort: ['-event_id', '-is_default'] as never,
+        limit: 5,
       })
     ) as any[]
     if (!paymentConfigs[0]) {
-      return NextResponse.json({ error: 'Payment not configured' }, { status: 503 })
+      return NextResponse.json({ error: `Payment not configured for ${currency}` }, { status: 503 })
     }
 
-    const creds = paymentConfigs[0].credentials ?? {}
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { PayOS: PayOSClient } = require('@payos/node') as { PayOS: new (opts: Record<string, string>) => { paymentRequests: { create: (data: Record<string, unknown>) => Promise<{ checkoutUrl: string }> } } }
-    const payosClient = new PayOSClient({ clientId: creds.client_id, apiKey: creds.api_key, checksumKey: creds.checksum_key })
-
+    const selectedProvider = paymentConfigs[0]
+    const creds = selectedProvider.credentials ?? {}
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL!
-    const description = `Order ${payosOrderCode}`.slice(0, 25)
+    const returnUrl = `${baseUrl}/${site_slug}/${lang}/checkout/success?order=${order.id}`
+    const cancelUrl = `${baseUrl}/${site_slug}/${lang}/checkout/cancel?order=${order.id}`
 
-    const { checkoutUrl } = await payosClient.paymentRequests.create({
-      orderCode: payosOrderCode, amount: totalAmount, description,
-      returnUrl: `${baseUrl}/${site_slug}/${lang}/checkout/success?order=${order.id}`,
-      cancelUrl: `${baseUrl}/${site_slug}/${lang}/checkout/cancel?order=${order.id}`,
-    })
+    // Update order with resolved payment method
+    await adminDirectus.request(
+      updateItem('ticket_orders' as never, order.id as never, { payment_method: selectedProvider.provider } as never)
+    )
 
-    return NextResponse.json({ payment_url: checkoutUrl, order_id: order.id })
+    if (selectedProvider.provider === 'payos') {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { PayOS: PayOSClient } = require('@payos/node') as { PayOS: new (opts: Record<string, string>) => { paymentRequests: { create: (data: Record<string, unknown>) => Promise<{ checkoutUrl: string }> } } }
+      const payosClient = new PayOSClient({ clientId: creds.client_id, apiKey: creds.api_key, checksumKey: creds.checksum_key })
+      const description = `Order ${payosOrderCode}`.slice(0, 25)
+      const { checkoutUrl } = await payosClient.paymentRequests.create({
+        orderCode: payosOrderCode, amount: totalAmount, description, returnUrl, cancelUrl,
+      })
+      return NextResponse.json({ payment_url: checkoutUrl, order_id: order.id })
+    }
+
+    // Stripe and other providers: return order_id for client-side handling
+    return NextResponse.json({ provider: selectedProvider.provider, order_id: order.id, amount: totalAmount, currency })
   } catch (err: any) {
     console.error('[checkout API] Error:', err)
 

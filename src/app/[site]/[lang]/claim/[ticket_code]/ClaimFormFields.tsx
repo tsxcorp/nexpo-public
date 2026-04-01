@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface FormField {
   id: string
@@ -50,10 +51,12 @@ function InputField({
 }
 
 export default function ClaimFormFields({ fields, answers, onChange, lang }: Props) {
+  const { t } = useTranslation()
+
   return (
     <>
       {fields.map(field => {
-        const tr = field.translations?.find(t => t.languages_code?.startsWith(lang)) ?? field.translations?.[0]
+        const tr = field.translations?.find(tr => tr.languages_code?.startsWith(lang)) ?? field.translations?.[0]
         const label = tr?.label || field.name
         const placeholder = tr?.placeholder || ''
         const rawOptions = tr?.options ?? field.options ?? []
@@ -71,8 +74,8 @@ export default function ClaimFormFields({ fields, answers, onChange, lang }: Pro
                 className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:border-transparent transition"
                 style={{ '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}
               >
-                <option value="">{lang === 'vi' ? 'Chọn...' : 'Select...'}</option>
-                {selectOptions.map(opt => (
+                <option value="">{t('claim.select_placeholder')}</option>
+                {selectOptions.map((opt: { label: string; value: string }) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
@@ -106,7 +109,7 @@ export default function ClaimFormFields({ fields, answers, onChange, lang }: Pro
                 {label}{field.is_required && <span className="text-red-500 ml-0.5">*</span>}
               </label>
               <div className="flex flex-wrap gap-2">
-                {selectOptions.map(opt => {
+                {selectOptions.map((opt: { label: string; value: string }) => {
                   const isSelected = selected.includes(opt.value)
                   return (
                     <button

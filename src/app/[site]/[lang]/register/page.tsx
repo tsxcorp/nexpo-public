@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { getSite } from '@/directus/queries/sites'
 import { fetchRegistrationForm } from '@/directus/queries/forms'
 import { fetchNavigationSafe } from '@/directus/queries/navigation'
+import { initTranslations } from '@/i18n/i18n'
 import TheHeader from '@/components/navigation/TheHeader'
 import TheFooter from '@/components/navigation/TheFooter'
 import FormBlock from '@/components/blocks/FormBlock'
@@ -10,8 +11,8 @@ import type { PageProps } from '@/types/next'
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { site, lang } = await params
-  const siteData = await getSite(site)
-  const title = lang === 'vi' ? 'Đăng ký tham dự' : 'Register'
+  const [siteData, { t }] = await Promise.all([getSite(site), initTranslations(lang)])
+  const title = t('register.title')
   return {
     title: siteData?.name ? `${title} — ${siteData.name}` : title,
     robots: { index: false, follow: false },
@@ -22,18 +23,15 @@ export default async function RegisterPage({ params }: PageProps) {
   const { site, lang } = await params
   const currentPathname = `/${site}/${lang}/register`
 
-  const [siteData, mainNav, footerNav] = await Promise.all([
+  const [siteData, mainNav, footerNav, { t }] = await Promise.all([
     getSite(site),
     fetchNavigationSafe(site, lang, 'header'),
     fetchNavigationSafe(site, lang, 'footer'),
+    initTranslations(lang),
   ])
 
   const eventId = (siteData as any)?.event_id as number | undefined
   const form = await fetchRegistrationForm(site, eventId)
-
-  const t = lang === 'vi'
-    ? { title: 'Đăng ký tham dự', not_found: 'Form đăng ký chưa được cấu hình.' }
-    : { title: 'Register', not_found: 'Registration form is not available yet.' }
 
   return (
     <>
@@ -52,7 +50,7 @@ export default async function RegisterPage({ params }: PageProps) {
             className="text-3xl font-bold text-center mb-10"
             style={{ color: 'var(--color-primary)' }}
           >
-            {t.title}
+            {t('register.title')}
           </h1>
 
           {form ? (
@@ -68,7 +66,7 @@ export default async function RegisterPage({ params }: PageProps) {
             </div>
           ) : (
             <div className="text-center text-gray-500 py-20">
-              <p>{t.not_found}</p>
+              <p>{t('register.not_found')}</p>
             </div>
           )}
         </div>

@@ -42,7 +42,8 @@
     "website": "Trang web",
     "no_results": "Không tìm thấy nhà triển lãm nào",
     "featured": "Nổi bật",
-    "view_all": "Xem tất cả nhà triển lãm"
+    "view_all": "Xem tất cả nhà triển lãm",
+    "participants": "đơn vị tham gia"
   },
   "agenda": {
     "page_title": "Lịch chương trình",
@@ -50,13 +51,15 @@
     "day": "Ngày",
     "all_tracks": "Tất cả track",
     "no_sessions": "Chưa có lịch chương trình",
-    "view_all": "Xem toàn bộ lịch"
+    "view_all": "Xem toàn bộ lịch",
+    "sessions": "phiên"
   },
   "speakers": {
     "page_title": "Diễn giả",
     "no_speakers": "Chưa có thông tin diễn giả",
     "view_all": "Xem tất cả diễn giả",
-    "search_placeholder": "Tìm kiếm diễn giả..."
+    "search_placeholder": "Tìm kiếm diễn giả...",
+    "speakers_count": "diễn giả"
   },
   "posts": {
     "page_title": "Tất cả bài viết",
@@ -65,5 +68,107 @@
     "featured": "Bài viết nổi bật",
     "latest": "Bài viết mới nhất",
     "category_for": "Bài viết theo danh mục: "
+  },
+  "register": {
+    "title": "Đăng ký tham dự",
+    "not_found": "Form đăng ký chưa được cấu hình."
+  },
+  "checkout": {
+    "page_title": "Đặt vé",
+    "step1": "Giỏ vé",
+    "step2": "Thông tin",
+    "step3": "Xác nhận & Thanh toán",
+    "next": "Tiếp tục",
+    "back": "Quay lại",
+    "confirm": "Xác nhận & Đặt vé",
+    "loading": "Đang xử lý...",
+    "qty": "Số lượng",
+    "name": "Họ và tên",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "holder_info": "Thông tin người đi kèm",
+    "total": "Tổng cộng",
+    "free": "Miễn phí",
+    "per_ticket": "Vé",
+    "empty_cart": "Giỏ vé trống.",
+    "err_required": "Vui lòng điền đầy đủ thông tin bắt buộc.",
+    "err_general": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+    "your_tickets": "Giỏ vé của bạn",
+    "registration_info": "Thông tin đăng ký",
+    "order_summary": "Xác nhận đơn vé",
+    "buyer": "Người mua",
+    "payos_redirect": "Bạn sẽ được chuyển đến trang thanh toán PayOS.",
+    "promo_code": "Mã giảm giá",
+    "apply": "Áp dụng",
+    "discount": "Giảm giá",
+    "full_name": "Họ và tên",
+    "full_name_placeholder": "Nguyễn Văn A",
+    "phone_placeholder": "+84...",
+    "companion_name": "Tên người đi kèm",
+    "companion_email": "Email người đi kèm",
+    "select_placeholder": "Chọn...",
+    "err_promo": "Không thể kiểm tra mã."
+  },
+  "checkout_success": {
+    "confirming": "Đang xác nhận thanh toán...",
+    "confirmed_title": "Đặt vé thành công! 🎉",
+    "confirmed_body": "Vé của bạn đã được xác nhận. Kiểm tra email để nhận mã QR.",
+    "browse_more": "Xem vé khác",
+    "processing_title": "Đang chờ xác nhận",
+    "processing_body": "Thanh toán đang được xử lý. Bạn sẽ nhận email xác nhận sớm.",
+    "not_found": "Không tìm thấy đơn vé."
+  },
+  "checkout_cancel": {
+    "title": "Thanh toán đã bị huỷ",
+    "body": "Giao dịch của bạn đã bị huỷ. Đơn vé sẽ được giải phóng sau vài phút.",
+    "try_again": "Thử lại"
+  },
+  "tickets": {
+    "title": "Vé tham dự",
+    "subtitle": "Chọn loại vé phù hợp với bạn",
+    "empty": "Chưa có vé nào đang mở bán.",
+    "buy_now": "Mua ngay",
+    "sold_out": "Hết vé",
+    "free": "Miễn phí",
+    "remaining": "còn lại",
+    "checkout_btn": "Đặt vé",
+    "add": "Thêm",
+    "addons_title": "Vé bổ sung",
+    "addons_subtitle": "Chọn thêm cùng với vé chính",
+    "requires_ticket": "Yêu cầu vé chính",
+    "needs_main_ticket": "Cần thêm vé chính trước",
+    "ticket_count": "vé",
+    "currency": "Đơn vị tiền",
+    "price_not_available": "Chưa có giá cho đơn vị tiền này",
+    "unavailable": "Không khả dụng"
+  },
+  "claim": {
+    "title": "Nhận vé của bạn",
+    "subtitle": "Điền thông tin để nhận mã QR vào cửa.",
+    "name": "Họ và tên",
+    "email": "Email",
+    "submit": "Nhận vé",
+    "loading": "Đang xử lý...",
+    "err_required": "Vui lòng điền đủ tên và email.",
+    "err_required_fields": "Vui lòng điền đủ các trường bắt buộc.",
+    "err_general": "Đã có lỗi. Vui lòng thử lại.",
+    "already_used": "Vé này đã được sử dụng.",
+    "select_placeholder": "Chọn..."
+  },
+  "event_info": {
+    "date_label": "Thời gian",
+    "location_label": "Địa điểm",
+    "event_label": "Sự kiện",
+    "register_cta": "Đăng ký tham dự"
+  },
+  "agenda_preview": {
+    "view_all": "Xem tất cả chương trình"
+  },
+  "countdown": {
+    "days": "Ngày",
+    "hours": "Giờ",
+    "minutes": "Phút",
+    "seconds": "Giây",
+    "started": "Sự kiện đã bắt đầu!"
   }
 }

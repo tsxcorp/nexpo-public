@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
 import type { CartItem } from '../tickets/TicketListingClient'
 
 interface TicketClass {
@@ -27,9 +28,11 @@ interface RegistrationFormField {
 
 interface RegistrationForm { id: string; fields?: RegistrationFormField[] }
 
+import { formatPrice as _formatPrice } from '@/lib/utils/currency-format'
+
+/** Wrapper that never returns null — checkout always shows a value */
 function formatPrice(price: number, currency: string) {
-  if (currency === 'VND') return price.toLocaleString('vi-VN') + '₫'
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price)
+  return _formatPrice(price, currency) ?? '0'
 }
 
 function InputField({ label, value, onChange, type = 'text', required = false, placeholder = '' }: {
@@ -58,28 +61,7 @@ const CART_KEY = 'nexpo_ticket_cart'
 export default function CheckoutClient({ site, lang, initialTicketClass, registrationForm = null }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const isVI = lang === 'vi'
-
-  const T = {
-    step1: isVI ? 'Giỏ vé' : 'Cart',
-    step2: isVI ? 'Thông tin' : 'Your Info',
-    step3: isVI ? 'Xác nhận & Thanh toán' : 'Confirm & Pay',
-    next: isVI ? 'Tiếp tục' : 'Continue',
-    back: isVI ? 'Quay lại' : 'Back',
-    confirm: isVI ? 'Xác nhận & Đặt vé' : 'Confirm & Book',
-    loading: isVI ? 'Đang xử lý...' : 'Processing...',
-    qty: isVI ? 'Số lượng' : 'Quantity',
-    name: isVI ? 'Họ và tên' : 'Full Name',
-    email: 'Email',
-    phone: isVI ? 'Số điện thoại' : 'Phone',
-    holderInfo: isVI ? 'Thông tin người đi kèm' : 'Companion Info',
-    total: isVI ? 'Tổng cộng' : 'Total',
-    free: isVI ? 'Miễn phí' : 'Free',
-    perTicket: isVI ? 'Vé' : 'Ticket',
-    emptyCart: isVI ? 'Giỏ vé trống.' : 'Your cart is empty.',
-    errRequired: isVI ? 'Vui lòng điền đầy đủ thông tin bắt buộc.' : 'Please fill in all required fields.',
-    errGeneral: isVI ? 'Đã có lỗi xảy ra. Vui lòng thử lại.' : 'Something went wrong. Please try again.',
-  }
+  const { t } = useTranslation()
 
   // ── Cart state ──
   const [cartItems, setCartItems] = useState<CartItem[]>([])
@@ -132,7 +114,7 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
       if (!res.ok) { setError(data.error ?? 'Invalid promo code'); setPromoApplied(false); setPromoDiscount(0); return }
       setPromoDiscount(data.discount ?? 0)
       setPromoApplied(true)
-    } catch { setError(isVI ? 'Không thể kiểm tra mã.' : 'Could not validate code.') }
+    } catch { setError(t('checkout.err_promo')) }
     finally { setPromoValidating(false) }
   }
 
@@ -186,14 +168,14 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
 
   const validateStep1 = () => cartItems.length > 0
   const validateStep2 = () => {
-    // Fallback fields shown when no form OR form lacks contact
+    // Fallback fields shown when no form OR form lacks contact fields
     if (!hasCheckoutForm || showFallbackBeforeForm) {
-      if (!buyer.name.trim() || !buyer.email.trim()) { setError(T.errRequired); return false }
+      if (!buyer.name.trim() || !buyer.email.trim()) { setError(t('checkout.err_required')); return false }
     }
     // Form fields validation
     if (hasCheckoutForm) {
       const missing = formFields.some(f => f.is_required && !formAnswers[f.name]?.trim())
-      if (missing) { setError(T.errRequired); return false }
+      if (missing) { setError(t('checkout.err_required')); return false }
     }
     return true
   }
@@ -217,9 +199,12 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
     setSubmitting(true); setError(null)
     try {
       const derivedBuyer = deriveBuyerFromForm()
+      // Pass the currency from the cart (set during ticket selection)
+      const cartCurrency = cartItems[0]?.currency ?? 'VND'
       const payload: Record<string, unknown> = {
         items: cartItems.map(c => ({ ticket_class_id: c.id, quantity: c.quantity })),
         buyer: derivedBuyer, holders, site_slug: site, lang,
+        currency: cartCurrency,
         ...(promoApplied && promoCode ? { promo_code: promoCode } : {}),
       }
       // Include form answers for form_submission creation
@@ -232,7 +217,7 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
         body: JSON.stringify(payload),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error ?? T.errGeneral); return }
+      if (!res.ok) { setError(data.error ?? t('checkout.err_general')); return }
       // Clear cart
       sessionStorage.removeItem(CART_KEY)
       if (data.payment_url) {
@@ -240,7 +225,7 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
       } else {
         router.push(`/${site}/${lang}/checkout/success?order=${data.order_id}`)
       }
-    } catch { setError(T.errGeneral) }
+    } catch { setError(t('checkout.err_general')) }
     finally { setSubmitting(false) }
   }
 
@@ -251,14 +236,14 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
   if (cartItems.length === 0) {
     return (
       <div className="text-center py-24">
-        <p className="text-gray-400 mb-4">{T.emptyCart}</p>
-        <button onClick={() => router.back()} className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>{T.back}</button>
+        <p className="text-gray-400 mb-4">{t('checkout.empty_cart')}</p>
+        <button onClick={() => router.back()} className="text-sm font-medium" style={{ color: 'var(--color-primary)' }}>{t('checkout.back')}</button>
       </div>
     )
   }
 
   // ── Step bar ──
-  const steps = [T.step1, T.step2, T.step3]
+  const steps = [t('checkout.step1'), t('checkout.step2'), t('checkout.step3')]
   const StepBar = () => (
     <div className="flex items-center gap-2 mb-8">
       {steps.map((label, i) => {
@@ -294,14 +279,14 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
         {/* ── Step 1: Review Cart ── */}
         {step === 1 && (
           <div className="space-y-4">
-            <h2 className="font-semibold text-gray-900 mb-2">{isVI ? 'Giỏ vé của bạn' : 'Your Tickets'}</h2>
+            <h2 className="font-semibold text-gray-900 mb-2">{t('checkout.your_tickets')}</h2>
 
             {cartItems.map(item => (
               <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900">{item.name}</p>
                   <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--color-primary)' }}>
-                    {item.price === 0 ? T.free : formatPrice(item.price, item.currency)}
+                    {item.price === 0 ? t('checkout.free') : formatPrice(item.price, item.currency)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -324,7 +309,7 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
               {cartItems.map(item => (
                 <div key={item.id} className="flex justify-between text-gray-600">
                   <span>{item.name} x{item.quantity}</span>
-                  <span>{item.price === 0 ? T.free : formatPrice(item.price * item.quantity, item.currency)}</span>
+                  <span>{item.price === 0 ? t('checkout.free') : formatPrice(item.price * item.quantity, item.currency)}</span>
                 </div>
               ))}
               {/* Promo code */}
@@ -332,47 +317,47 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
                 <input
                   type="text" value={promoCode}
                   onChange={e => { setPromoCode(e.target.value.toUpperCase()); if (promoApplied) { setPromoApplied(false); setPromoDiscount(0); } }}
-                  placeholder={isVI ? 'Mã giảm giá' : 'Promo code'}
+                  placeholder={t('checkout.promo_code')}
                   className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:border-transparent transition"
                   style={{ '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}
                 />
                 <button onClick={validatePromo} disabled={promoValidating || !promoCode.trim()}
                   className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 text-gray-700 hover:bg-gray-50 transition disabled:opacity-40">
-                  {promoValidating ? '...' : (isVI ? 'Áp dụng' : 'Apply')}
+                  {promoValidating ? '...' : t('checkout.apply')}
                 </button>
               </div>
               {promoApplied && promoDiscount > 0 && (
                 <div className="flex justify-between text-sm text-green-600">
-                  <span>{isVI ? 'Giảm giá' : 'Discount'}</span>
+                  <span>{t('checkout.discount')}</span>
                   <span>-{formatPrice(promoDiscount, currency)}</span>
                 </div>
               )}
 
               <div className="flex justify-between pt-2 border-t border-gray-100 text-base font-semibold text-gray-900">
-                <span>{T.total}</span>
+                <span>{t('checkout.total')}</span>
                 <span style={{ color: 'var(--color-primary)' }}>
-                  {totalAmount === 0 ? T.free : formatPrice(totalAmount, currency)}
+                  {totalAmount === 0 ? t('checkout.free') : formatPrice(totalAmount, currency)}
                 </span>
               </div>
             </div>
 
             <button onClick={() => { if (validateStep1()) { setError(null); setStep(2) } }}
               className="w-full py-3 rounded-xl text-white font-semibold transition-opacity hover:opacity-90"
-              style={{ background: 'var(--color-primary)' }}>{T.next}</button>
+              style={{ background: 'var(--color-primary)' }}>{t('checkout.next')}</button>
           </div>
         )}
 
         {/* ── Step 2: Registration info (form fields or fallback) ── */}
         {step === 2 && (
           <div className="space-y-4">
-            <h2 className="font-semibold text-gray-900 mb-4">{isVI ? 'Thông tin đăng ký' : 'Registration Info'}</h2>
+            <h2 className="font-semibold text-gray-900 mb-4">{t('checkout.registration_info')}</h2>
 
             {/* Registration fallback: always show if no form OR form lacks contact fields */}
             {(!hasCheckoutForm || showFallbackBeforeForm) && (
               <div className="space-y-4">
-                <InputField label={isVI ? 'Họ và tên' : 'Full Name'} value={buyer.name} onChange={v => setBuyer(b => ({ ...b, name: v }))} required placeholder={isVI ? 'Nguyễn Văn A' : 'John Doe'} />
-                <InputField label="Email" type="email" value={buyer.email} onChange={v => setBuyer(b => ({ ...b, email: v }))} required placeholder="email@example.com" />
-                <InputField label={isVI ? 'Số điện thoại' : 'Phone'} type="tel" value={buyer.phone} onChange={v => setBuyer(b => ({ ...b, phone: v }))} placeholder="+84..." />
+                <InputField label={t('checkout.full_name')} value={buyer.name} onChange={v => setBuyer(b => ({ ...b, name: v }))} required placeholder={t('checkout.full_name_placeholder')} />
+                <InputField label={t('checkout.email')} type="email" value={buyer.email} onChange={v => setBuyer(b => ({ ...b, email: v }))} required placeholder="email@example.com" />
+                <InputField label={t('checkout.phone')} type="tel" value={buyer.phone} onChange={v => setBuyer(b => ({ ...b, phone: v }))} placeholder={t('checkout.phone_placeholder')} />
               </div>
             )}
 
@@ -380,7 +365,7 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
               /* Form mode: render all form fields (contact + profile, sorted by admin) */
               <div className={`space-y-4 ${showFallbackBeforeForm ? 'pt-4 border-t border-gray-100' : ''}`}>
                 {formFields.map(field => {
-                  const tr = field.translations?.find(t => t.languages_code === lang) ?? field.translations?.[0]
+                  const tr = field.translations?.find(tr => tr.languages_code === lang) ?? field.translations?.[0]
                   const label = tr?.label || field.name
                   const placeholder = tr?.placeholder || ''
                   const selectOptions = tr?.options ?? field.options ?? []
@@ -391,7 +376,7 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
                         <select value={formAnswers[field.name] ?? ''} onChange={e => setFormAnswers(prev => ({ ...prev, [field.name]: e.target.value }))}
                           className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:border-transparent transition"
                           style={{ '--tw-ring-color': 'var(--color-primary)' } as React.CSSProperties}>
-                          <option value="">{isVI ? 'Chọn...' : 'Select...'}</option>
+                          <option value="">{t('checkout.select_placeholder')}</option>
                           {selectOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                         </select>
                       </div>
@@ -440,22 +425,22 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
             {/* Companion holders */}
             {holders.length > 0 && (
               <div className="pt-4 border-t border-gray-100 space-y-4">
-                <p className="font-medium text-sm text-gray-700">{T.holderInfo}</p>
+                <p className="font-medium text-sm text-gray-700">{t('checkout.holder_info')}</p>
                 {holders.map((h, i) => (
                   <div key={i} className="p-4 rounded-xl bg-gray-50 space-y-3">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{T.perTicket} {i + 2}</p>
-                    <InputField label={T.name} value={h.name} onChange={v => updateHolder(i, 'name', v)} placeholder={isVI ? 'Tên người đi kèm' : "Companion's name"} />
-                    <InputField label={T.email} type="email" value={h.email} onChange={v => updateHolder(i, 'email', v)} placeholder={isVI ? 'Email người đi kèm' : "Companion email"} />
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('checkout.per_ticket')} {i + 2}</p>
+                    <InputField label={t('checkout.name')} value={h.name} onChange={v => updateHolder(i, 'name', v)} placeholder={t('checkout.companion_name')} />
+                    <InputField label={t('checkout.email')} type="email" value={h.email} onChange={v => updateHolder(i, 'email', v)} placeholder={t('checkout.companion_email')} />
                   </div>
                 ))}
               </div>
             )}
 
             <div className="flex gap-3 pt-2">
-              <button onClick={() => { setError(null); setStep(1) }} className="flex-1 py-3 rounded-xl border text-sm font-medium transition" style={{ borderColor: '#e5e7eb', color: '#4b5563' }}>{T.back}</button>
+              <button onClick={() => { setError(null); setStep(1) }} className="flex-1 py-3 rounded-xl border text-sm font-medium transition" style={{ borderColor: '#e5e7eb', color: '#4b5563' }}>{t('checkout.back')}</button>
               <button onClick={() => { if (validateStep2()) { setError(null); setStep(3) } }}
                 className="flex-[2] py-3 rounded-xl text-white font-semibold transition-opacity hover:opacity-90"
-                style={{ background: 'var(--color-primary)' }}>{T.next}</button>
+                style={{ background: 'var(--color-primary)' }}>{t('checkout.next')}</button>
             </div>
           </div>
         )}
@@ -463,36 +448,36 @@ export default function CheckoutClient({ site, lang, initialTicketClass, registr
         {/* ── Step 3: Confirm ── */}
         {step === 3 && (
           <div className="space-y-6">
-            <h2 className="font-semibold text-gray-900 mb-2">{isVI ? 'Xác nhận đơn vé' : 'Order Summary'}</h2>
+            <h2 className="font-semibold text-gray-900 mb-2">{t('checkout.order_summary')}</h2>
 
             <div className="space-y-3 text-sm" style={{ color: '#111827' }}>
               {cartItems.map(item => (
                 <div key={item.id} className="flex justify-between">
                   <span style={{ color: '#6b7280' }}>{item.name} x{item.quantity}</span>
-                  <span className="font-medium">{item.price === 0 ? T.free : formatPrice(item.price * item.quantity, item.currency)}</span>
+                  <span className="font-medium">{item.price === 0 ? t('checkout.free') : formatPrice(item.price * item.quantity, item.currency)}</span>
                 </div>
               ))}
               <div className="border-t border-gray-100 pt-2" />
-              <div className="flex justify-between"><span style={{ color: '#6b7280' }}>{isVI ? 'Người mua' : 'Buyer'}</span><span className="font-medium">{buyer.name}</span></div>
-              <div className="flex justify-between"><span style={{ color: '#6b7280' }}>Email</span><span className="font-medium">{buyer.email}</span></div>
+              <div className="flex justify-between"><span style={{ color: '#6b7280' }}>{t('checkout.buyer')}</span><span className="font-medium">{buyer.name}</span></div>
+              <div className="flex justify-between"><span style={{ color: '#6b7280' }}>{t('checkout.email')}</span><span className="font-medium">{buyer.email}</span></div>
               <div className="flex justify-between pt-3 border-t text-base" style={{ borderColor: '#f3f4f6' }}>
-                <span className="font-semibold">{T.total}</span>
+                <span className="font-semibold">{t('checkout.total')}</span>
                 <span className="font-bold text-lg" style={{ color: 'var(--color-primary)' }}>
-                  {totalAmount === 0 ? T.free : formatPrice(totalAmount, currency)}
+                  {totalAmount === 0 ? t('checkout.free') : formatPrice(totalAmount, currency)}
                 </span>
               </div>
             </div>
 
             {totalAmount > 0 && (
-              <p className="text-xs text-gray-400 text-center">{isVI ? 'Bạn sẽ được chuyển đến trang thanh toán PayOS.' : 'You will be redirected to PayOS payment page.'}</p>
+              <p className="text-xs text-gray-400 text-center">{t('checkout.payos_redirect')}</p>
             )}
 
             <div className="flex gap-3">
-              <button onClick={() => { setError(null); setStep(2) }} className="flex-1 py-3 rounded-xl border text-sm font-medium transition" style={{ borderColor: '#e5e7eb', color: '#4b5563' }}>{T.back}</button>
+              <button onClick={() => { setError(null); setStep(2) }} className="flex-1 py-3 rounded-xl border text-sm font-medium transition" style={{ borderColor: '#e5e7eb', color: '#4b5563' }}>{t('checkout.back')}</button>
               <button onClick={handleConfirm} disabled={submitting}
                 className="flex-[2] py-3 rounded-xl text-white font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
                 style={{ background: 'var(--color-primary)' }}>
-                {submitting ? T.loading : T.confirm}
+                {submitting ? t('checkout.loading') : t('checkout.confirm')}
               </button>
             </div>
           </div>

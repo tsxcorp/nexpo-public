@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CountdownBlockData {
   translations?: { languages_code: string; title?: string }[];
@@ -26,7 +27,9 @@ function calcTimeLeft(targetDate: string) {
 
 export default function CountdownBlock({ data, lang, eventStartDate }: Props) {
   const targetDate = data.target_date || eventStartDate;
-  const title = data.translations?.find(t => t.languages_code?.startsWith(lang))?.title
+  const { t } = useTranslation();
+
+  const title = data.translations?.find(tr => tr.languages_code?.startsWith(lang))?.title
     || data.translations?.[0]?.title;
 
   const [timeLeft, setTimeLeft] = useState<ReturnType<typeof calcTimeLeft> | null>(null);
@@ -44,9 +47,12 @@ export default function CountdownBlock({ data, lang, eventStartDate }: Props) {
 
   if (!targetDate) return null;
 
-  const labels = lang === 'vi'
-    ? { days: 'Ngày', hours: 'Giờ', minutes: 'Phút', seconds: 'Giây' }
-    : { days: 'Days', hours: 'Hours', minutes: 'Minutes', seconds: 'Seconds' };
+  const labels = {
+    days: t('countdown.days'),
+    hours: t('countdown.hours'),
+    minutes: t('countdown.minutes'),
+    seconds: t('countdown.seconds'),
+  };
 
   const finished = mounted && !timeLeft;
 
@@ -60,7 +66,7 @@ export default function CountdownBlock({ data, lang, eventStartDate }: Props) {
         )}
         {finished ? (
           <p className="text-lg font-semibold text-gray-600">
-            {lang === 'vi' ? 'Sự kiện đã bắt đầu!' : 'The event has started!'}
+            {t('countdown.started')}
           </p>
         ) : (
           <div className="flex items-center justify-center gap-3 md:gap-6">
