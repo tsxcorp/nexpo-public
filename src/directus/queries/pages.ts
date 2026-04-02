@@ -107,7 +107,6 @@ export const fetchPage = async (siteSlug: string, lang: string, permalink: strin
             { translations: ['*'] },
             { blocks: ['*', { item: blockItemFields }] },
             { seo: ['*'] },
-            { site_id: ['*'] },
           ],
           deep: {
             // TypeScript is too strict for Directus _filter syntax, so we cast as any for these nested filters
