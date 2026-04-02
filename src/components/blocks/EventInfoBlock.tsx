@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { initTranslations } from '@/i18n/i18n';
+import { useTranslation } from 'react-i18next';
 import { findTranslation } from '@/lib/utils/translation-helpers';
 import type { EventBasicInfo } from '@/directus/types';
 
@@ -30,10 +32,10 @@ function formatDateLong(dateStr: string | null | undefined, lang: string): strin
   }
 }
 
-export default async function EventInfoBlock({ data, lang, event, registerUrl }: Props) {
-  if (!event) return null;
+export default function EventInfoBlock({ data, lang, event, registerUrl }: Props) {
+  const { t } = useTranslation();
 
-  const { t } = await initTranslations(lang);
+  if (!event) return null;
 
   const title = findTranslation(data.translations, lang)?.title;
 

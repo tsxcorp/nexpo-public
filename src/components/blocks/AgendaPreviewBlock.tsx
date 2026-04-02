@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { initTranslations } from '@/i18n/i18n';
+import { useTranslation } from 'react-i18next';
 import { findTranslation } from '@/lib/utils/translation-helpers';
 import type { AgendaSession } from '@/directus/types';
 
@@ -22,8 +24,8 @@ function formatTime(time: string | null | undefined): string {
   return time.slice(0, 5); // HH:MM
 }
 
-export default async function AgendaPreviewBlock({ data, lang, agendaSessions, agendaUrl }: Props) {
-  const { t } = await initTranslations(lang);
+export default function AgendaPreviewBlock({ data, lang, agendaSessions, agendaUrl }: Props) {
+  const { t } = useTranslation();
 
   const title = findTranslation(data.translations, lang)?.title;
 
