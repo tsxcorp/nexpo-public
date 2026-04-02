@@ -27,7 +27,7 @@ export default function ExhibitorsBlock({ data, lang, exhibitors }: Props) {
   return (
     <section className="py-12 px-4 md:px-8 lg:px-16">
       {title && (
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10" className="text-[var(--color-primary)]">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[var(--color-primary)]">
           {title}
         </h2>
       )}
@@ -63,8 +63,7 @@ export default function ExhibitorsBlock({ data, lang, exhibitors }: Props) {
               {/* Booth badge */}
               {ev.booth_number && (
                 <span
-                  className="text-[10px] font-semibold text-white px-2.5 py-0.5 rounded-full"
-                  className="bg-[var(--color-primary)]"
+                  className="text-[10px] font-semibold text-white px-2.5 py-0.5 rounded-full bg-[var(--color-primary)]"
                 >
                   Booth {ev.booth_number}
                 </span>

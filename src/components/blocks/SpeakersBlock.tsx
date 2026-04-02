@@ -25,7 +25,7 @@ export default function SpeakersBlock({ data, lang, speakers }: Props) {
   return (
     <section className="py-12 px-4 md:px-8 lg:px-16">
       {title && (
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10" className="text-[var(--color-primary)]">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[var(--color-primary)]">
           {title}
         </h2>
       )}
@@ -51,13 +51,11 @@ export default function SpeakersBlock({ data, lang, speakers }: Props) {
                     alt={name}
                     width={96}
                     height={96}
-                    className="w-24 h-24 rounded-full object-cover border-2 shadow-sm"
-                    className="border-[var(--color-primary)]"
+                    className="w-24 h-24 rounded-full object-cover border-2 shadow-sm border-[var(--color-primary)]"
                   />
                 ) : (
                   <div
-                    className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-sm"
-                    className="bg-[var(--color-primary)]"
+                    className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-sm bg-[var(--color-primary)]"
                   >
                     {name.charAt(0)}
                   </div>

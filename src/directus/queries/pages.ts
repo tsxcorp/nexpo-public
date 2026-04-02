@@ -99,7 +99,7 @@ export const fetchPage = async (siteSlug: string, lang: string, permalink: strin
         readItems('pages' as any, {
           filter: {
             site_id: { _eq: site.id },
-            status: { _eq: 'published' },
+            status: { _in: ['published', 'draft'] },
             translations: { permalink: { _eq: permalink } },
           },
           fields: [

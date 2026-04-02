@@ -60,7 +60,7 @@ export default function CountdownBlock({ data, lang, eventStartDate }: Props) {
     <section className="py-12 px-4 md:px-8 lg:px-16">
       <div className="max-w-2xl mx-auto text-center">
         {title && (
-          <h2 className="text-2xl md:text-3xl font-bold mb-8" className="text-[var(--color-primary)]">
+          <h2 className="text-2xl md:text-3xl font-bold mb-8 text-[var(--color-primary)]">
             {title}
           </h2>
         )}
@@ -74,8 +74,7 @@ export default function CountdownBlock({ data, lang, eventStartDate }: Props) {
               <React.Fragment key={unit}>
                 <div className="flex flex-col items-center">
                   <div
-                    className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center text-white text-2xl md:text-3xl font-bold shadow-lg"
-                    className="bg-[var(--color-primary)]"
+                    className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center text-white text-2xl md:text-3xl font-bold shadow-lg bg-[var(--color-primary)]"
                   >
                     {mounted && timeLeft ? String(timeLeft[unit]).padStart(2, '0') : '--'}
                   </div>
