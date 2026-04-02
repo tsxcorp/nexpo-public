@@ -73,56 +73,30 @@ export default function LocaleSwitcher({ locales = [], site, translations = [], 
     };
   }, [open]);
 
-  console.log('[LocaleSwitcher] Debug props:', {
-    locales,
-    site,
-    translations,
-    currentLang,
-    localesLength: locales?.length,
-    isArray: Array.isArray(locales)
-  });
-
   if (!Array.isArray(locales) || locales.length < 2) {
-    console.log('[LocaleSwitcher] Not showing - insufficient locales:', { locales, length: locales?.length });
     return null;
   }
   
   // Lọc bỏ các phần tử null/undefined hoặc không có code
   const safeLocales = locales.filter(l => l && typeof l.code === 'string' && l.code.length > 0);
   if (safeLocales.length < 2) {
-    console.log('[LocaleSwitcher] Not showing - insufficient safe locales:', { safeLocales, length: safeLocales.length });
     return null;
   }
 
-  console.log('[LocaleSwitcher] Will render with locales:', safeLocales);
-
   const currentLocale = (i18n?.language || 'en').slice(0, 2);
 
-  console.log('LocaleSwitcher props:', {
-    locales: i18nConfig.locales,
-    site: site,
-    translations,
-    currentLang: currentLang,
-  });
-
   const setLang = (langItem: string) => {
-    console.log('translations:', translations);
-    console.log('langItem:', langItem);
     const translation = translations.find(t => {
       const translationCode = (t.languages_code || '').slice(0, 2);
       const targetCode = langItem.slice(0, 2);
       return translationCode === targetCode;
     });
-    console.log('matched translation:', translation);
     
     // Extract current path without language prefix to preserve the current route
     const currentPath = extractCurrentPath(currentPathname, currentLang);
-    console.log('[LocaleSwitcher] Current path extracted:', currentPath);
 
     // Build URL using utility function with current pathname
     const newUrl = buildUrl(langItem, currentPath, undefined, currentPathname);
-
-    console.log('[LocaleSwitcher] Switching to:', newUrl);
 
     startTransition(() => {
       router.push(newUrl);

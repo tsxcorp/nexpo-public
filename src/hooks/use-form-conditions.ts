@@ -60,8 +60,6 @@ export function evaluateCondition(
   const val = typeof sourceValue === 'string' ? sourceValue.trim() : (sourceValue ?? '');
   const target = typeof targetValue === 'string' ? targetValue.trim() : (targetValue ?? '');
 
-  console.log(`[evaluateCondition] Comparing: "${val}" ${operator} "${target}"`);
-
   switch (operator) {
     case '_eq':
       return String(val).toLowerCase() === String(target).toLowerCase();
@@ -103,8 +101,6 @@ export function evaluateCondition(
 export function useFormConditions(fields: Field[], form: UseFormReturn<any>) {
   const { watch, setValue, control } = form;
   
-  console.log('🟢 Hook useFormConditions INIT - Fields:', fields.length);
-
   // Trạng thái cho UI - Khởi tạo từ fields để tránh flickering
   const [visible, setVisible] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -148,7 +144,6 @@ export function useFormConditions(fields: Field[], form: UseFormReturn<any>) {
     });
 
     const resultNames = Array.from(names);
-    console.log('🔍 sourceFieldNames to watch:', resultNames);
     return { idToNameMap: idMap, sourceFieldNames: resultNames };
   }, [fields]);
 
@@ -172,8 +167,6 @@ export function useFormConditions(fields: Field[], form: UseFormReturn<any>) {
       map[id] = map[name];
     });
 
-    console.log('🔍 idToNameMap:', idToNameMap);
-    console.log('👀 Watched Map (Final):', map);
     return map;
   }, [watchedValues, sourceFieldNames, idToNameMap]);
 
@@ -210,7 +203,6 @@ export function useFormConditions(fields: Field[], form: UseFormReturn<any>) {
           const match = evaluateCondition(sourceValue, realCondition.operator, realCondition.value);
 
           if (match) {
-            console.log(` ✅ MATCH FOUND for field: ${field.id} (${field.name}), Action: ${realCondition.action}`);
             switch (realCondition.action) {
               case 'show':
                 isVisible = true;
@@ -225,7 +217,6 @@ export function useFormConditions(fields: Field[], form: UseFormReturn<any>) {
                 isRequired = true;
                 break;
               case 'optional':
-                console.log(` !!! EXECUTING OPTIONAL for ${rhfName}`);
                 isRequired = false;
                 // Xóa lỗi required cũ ngay lập tức nếu có
                 if (form.formState.errors[rhfName]) {

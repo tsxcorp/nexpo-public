@@ -34,8 +34,6 @@ const getMockGlobals = (): Globals => ({
 })
 
 export const fetchGlobals = async (siteId?: string): Promise<Globals | null> => {
-  console.log('\n=== Fetch Globals ===')
-  console.log('Site ID:', siteId)
 
   return await safeApiCall(async () => {
     const filters: any = {};
@@ -55,15 +53,8 @@ export const fetchGlobals = async (siteId?: string): Promise<Globals | null> => 
     ) as Globals[]
 
     if (!globals[0]) {
-      console.log('❌ No globals found')
       return null
     }
-
-    console.log('✅ Globals found:', {
-      id: globals[0].id,
-      site_id: globals[0].site_id,
-      translations: globals[0].translations?.length || 0
-    })
 
     return globals[0]
   }, getMockGlobals(), 'fetchGlobals()')

@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { getDirectusMedia } from '@/lib/utils/directus-helpers'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 import type { Speaker, SpeakerTranslation } from '@/directus/types'
 
 interface SpeakerCardProps {
@@ -9,18 +10,8 @@ interface SpeakerCardProps {
   onClick?: () => void
 }
 
-function getTranslation(translations: SpeakerTranslation[] | undefined, lang: string) {
-  if (!translations?.length) return null
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  return (
-    translations.find(t => t.languages_code === directusLang) ??
-    translations.find(t => t.languages_code?.startsWith(lang)) ??
-    translations[0]
-  )
-}
-
 export default function SpeakerCard({ speaker, lang, onClick }: SpeakerCardProps) {
-  const translation = getTranslation(speaker.translations, lang)
+  const translation = findTranslation(speaker.translations, lang)
   const displayName = translation?.name ?? speaker.name
   const displayTitle = translation?.title ?? speaker.position
   const displayCompany = translation?.company ?? speaker.company
@@ -56,7 +47,7 @@ export default function SpeakerCard({ speaker, lang, onClick }: SpeakerCardProps
       )}
 
       {displayCompany && (
-        <p className="mt-0.5 text-xs font-medium text-center" style={{ color: 'var(--color-primary)' }}>
+        <p className="mt-0.5 text-xs font-medium text-center text-[var(--color-primary)]">
           {displayCompany}
         </p>
       )}

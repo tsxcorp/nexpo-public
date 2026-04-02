@@ -14,7 +14,6 @@ interface TheFooterProps {
 
 // Helper function to generate URL for navigation items
 function getNavigationUrl(item: NavigationItem, currentLang: string, currentPathname: string) {
-  console.log('[getNavigationUrl] Called with:', { item, currentLang, currentPathname })
   
   let permalink = ''
   
@@ -35,11 +34,8 @@ function getNavigationUrl(item: NavigationItem, currentLang: string, currentPath
     permalink = item.url?.startsWith('/') ? item.url.slice(1) : item.url || ''
   }
   
-  console.log('[getNavigationUrl] Permalink:', permalink)
-  
   // Build URL using utility function with current pathname
   const result = buildUrl(currentLang, permalink, undefined, currentPathname)
-  console.log('[getNavigationUrl] Result:', result)
   return result
 }
 

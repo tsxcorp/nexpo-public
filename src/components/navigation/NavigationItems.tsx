@@ -23,7 +23,6 @@ interface ExtendedNavigationItem extends NavigationItem {
 }
 
 function getUrl(item: ExtendedNavigationItem, currentLang: string, currentPathname: string) {
-  console.log('[getUrl] Called with:', { item, currentLang, currentPathname })
   
   let permalink = ''
   
@@ -44,11 +43,8 @@ function getUrl(item: ExtendedNavigationItem, currentLang: string, currentPathna
     permalink = item.url?.startsWith('/') ? item.url.slice(1) : item.url || ''
   }
   
-  console.log('[getUrl] Permalink:', permalink)
-  
   // Build URL using utility function with current pathname
   const result = buildUrl(currentLang, permalink, undefined, currentPathname)
-  console.log('[getUrl] Result:', result)
   return result
 }
 

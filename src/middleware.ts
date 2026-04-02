@@ -29,16 +29,6 @@ export async function middleware(request: NextRequest) {
   let hostname = request.headers.get('host')?.split(':')[0] || request.nextUrl.hostname
 
   // === DIAGNOSTIC LOG — remove after debugging ===
-  console.log('[MW_DIAG]', JSON.stringify({
-    pathname,
-    hostname,
-    host_header: request.headers.get('host'),
-    nexturl_hostname: request.nextUrl.hostname,
-    MAIN_DOMAIN,
-    VERCEL_URL,
-    slugBasedDomains,
-    matchesSlugBased: slugBasedDomains.some(d => hostname.includes(d)),
-  }))
   // ===============================================
 
   // Skip internal paths or special routes — MUST BE FIRST
@@ -53,7 +43,6 @@ export async function middleware(request: NextRequest) {
 
   // Check if this domain uses slug-based routing (multi-site hub)
   if (slugBasedDomains.some(domain => hostname.includes(domain))) {
-    console.log('[middleware] Slug-based domain - using slug-based routing')
     return handleSlugBasedRouting(request, pathname)
   }
 
@@ -66,18 +55,15 @@ export async function middleware(request: NextRequest) {
   try {
     const site = await getSiteByDomain(hostname)
     if (site?.slug && site?.domain_verified) {
-      console.log('[middleware] Verified custom domain found:', hostname, '→', site.slug)
       return handleCustomDomainRouting(request, pathname, site.slug, hostname)
     }
     if (site && !site.domain_verified) {
-      console.log('[middleware] Custom domain not verified:', hostname)
     }
   } catch (error) {
     console.error('[middleware] Error finding site by domain:', error)
   }
 
   // Unknown domain — redirect to main site
-  console.log('[middleware] Unknown domain, redirecting to main site')
   return NextResponse.redirect(`https://${MAIN_DOMAIN}`)
 }
 
@@ -129,8 +115,6 @@ function handleCustomDomainRouting(
   const internalPath = cleanPath === '/'
     ? `/${siteSlug}/${lang}`
     : `/${siteSlug}/${lang}${cleanPath}`
-
-  console.log('[middleware] Custom domain rewrite:', customDomain + pathname, '→', internalPath)
 
   const newUrl = request.nextUrl.clone()
   newUrl.pathname = internalPath

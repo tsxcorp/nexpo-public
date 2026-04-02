@@ -11,16 +11,12 @@ interface DirectusFormBuilderProps {
 }
 
 export default function DirectusFormBuilder({ element, hookForm, disabled, required }: DirectusFormBuilderProps) {
-  console.log('DirectusFormBuilder - Received element:', element);
-  console.log('DirectusFormBuilder - Hook form:', hookForm);
 
   if (!element?.name) {
-    console.log('DirectusFormBuilder - No element name found');
     return null;
   }
 
   const { register } = hookForm;
-  console.log('DirectusFormBuilder - Register function:', register);
 
   // Get the first translation for now (we can add language support later)
   const translation = element.translations?.[0];
@@ -35,9 +31,6 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
     style: { borderColor: 'var(--color-border, #d1d5db)' },
     disabled: disabled,
   };
-
-  console.log('DirectusFormBuilder - Common props:', commonProps);
-  console.log('DirectusFormBuilder - Element type:', element.type);
 
   // Xác định trạng thái bắt buộc (động hoặc từ schema)
   const isRequired = required !== undefined ? required : (element.is_required || element.validation?.includes('required'));
@@ -61,7 +54,6 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
   switch (element.$formkit || element.type) {
     case 'text':
     case 'input':
-      console.log('DirectusFormBuilder - Rendering input field');
       return (
         <input 
           {...commonProps}
@@ -71,7 +63,6 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
       );
 
     case 'email':
-      console.log('DirectusFormBuilder - Rendering email field');
       return (
         <input 
           {...commonProps}
@@ -81,7 +72,6 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
       );
 
     case 'number':
-      console.log('DirectusFormBuilder - Rendering number field');
       return (
         <input 
           {...commonProps}
@@ -94,7 +84,6 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
       );
 
     case 'textarea':
-      console.log('DirectusFormBuilder - Rendering textarea field');
       return (
         <textarea 
           {...commonProps}
@@ -104,7 +93,6 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
       );
 
     case 'select':
-      console.log('DirectusFormBuilder - Rendering select field with options:', element.options);
       return (
         <select 
           {...commonProps}
@@ -120,7 +108,6 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
       );
 
     case 'multiselect':
-      console.log('DirectusFormBuilder - Rendering multiselect field with options:', element.options);
       return (
         <div className="space-y-2">
           {element.options?.map((option) => (
@@ -254,7 +241,6 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
     }
 
     default:
-      console.log('DirectusFormBuilder - No matching field type found');
       return null;
   }
 }

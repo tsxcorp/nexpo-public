@@ -67,7 +67,7 @@ export default function GlobalSearch({
       const data = await response.json()
       setResults(data)
     } catch (error) {
-      console.log(error)
+      console.error('[GlobalSearch] Search error:', error)
     }
     setLoading(false)
   }

@@ -23,7 +23,6 @@ export function FaviconProvider({ siteData }: FaviconProviderProps) {
       faviconLink.href = url
       faviconLink.type = type
       
-      console.log('[FaviconProvider] Set favicon:', url)
     }
 
     if (!siteData?.favicon) {

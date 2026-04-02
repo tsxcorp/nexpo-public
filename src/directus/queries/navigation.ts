@@ -3,6 +3,7 @@ import directus from '../client'
 import { withRevalidate, safeApiCall } from '../utils'
 import type { Navigation, NavigationItem } from '@/directus/types'
 import { getSite } from './sites'
+import { toDirectusLang } from '@/lib/utils/translation-helpers'
 
 // Mock data for fallback when Directus is not available
 const getMockNavigation = (siteSlug: string, lang: string, type: 'header' | 'footer' = 'header'): Navigation => ({
@@ -45,31 +46,18 @@ const getMockNavigation = (siteSlug: string, lang: string, type: 'header' | 'foo
 })
 
 export const fetchNavigationSafe = async function name(siteSlug: string, lang: string, type: 'header' | 'footer' = 'header'): Promise<Navigation | null> {
-  console.log('\n=== Fetch Navigation ===');
-  console.log('Site slug:', siteSlug);
-  console.log('Navigation type:', type);
 
   const site = await getSite(siteSlug);
   if (!site) {
-    console.log('❌ No site found');
     return null;
   }
 
-  console.log('Site navigation array:', site.navigation);
-  console.log('Requested navigation type:', type);
-
   // Check if the requested navigation type exists in site's navigation array
   if (!site.navigation) {
-    console.log('❌ Navigation type not found in site');
     return null;
   }
 
   return await safeApiCall(async () => {
-    console.log('Querying navigation with filters:', {
-      site_id: site.id,
-      type: type,
-      status: 'published'
-    });
 
     const navigation = await directus.request(
       withRevalidate(
@@ -92,22 +80,11 @@ export const fetchNavigationSafe = async function name(siteSlug: string, lang: s
       )
     ) as Navigation[];
 
-    console.log('Raw navigation response:', navigation);
-
     if (!navigation[0]) {
-      console.log('❌ No navigation found');
       return null;
     }
 
-    console.log('✅ Navigation found:', {
-      id: navigation[0].id,
-      type: navigation[0].type,
-      items: navigation[0].items?.length || 0,
-      status: navigation[0].status
-    });
-
-    const langMap = { vi: 'vi-VN', en: 'en-US' } as const;
-    const directusLang = langMap[lang as keyof typeof langMap] || lang;
+    const directusLang = toDirectusLang(lang);
 
     const processedItems = (navigation[0].items ?? [])
       .filter((item: NavigationItem | null) => item != null)

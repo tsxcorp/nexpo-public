@@ -7,40 +7,17 @@ export function getDirectusURL(path = '') {
 }
 
 export function getDirectusMedia(
-  url: string | DirectusFile | null | undefined
-) {
-  if (url == null || typeof url === undefined) {
-    return ''
-  }
-  let localUrl = typeof url === 'string' ? url : url.id
+  input: string | DirectusFile | null | undefined
+): string {
+  if (input == null) return ''
 
-  // Return the full URL if the media is hosted on an external provider
-  if (localUrl.startsWith('http') || localUrl.startsWith('//')) {
-    return localUrl
-  }
+  const id = typeof input === 'string' ? input : input?.id
+  if (!id) return ''
 
-  // Otherwise prepend the URL path with the Strapi URL
-  return `${getDirectusURL()}/assets/${url}`
-}
+  // Return full URL if already absolute
+  if (id.startsWith('http') || id.startsWith('//')) return id
 
-export function getStrapiURL(path = '') {
-  return `${
-    process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337'
-  }${path}`
-}
-
-export function getStrapiMedia(url: string | null) {
-  if (url == null) {
-    return null
-  }
-
-  // Return the full URL if the media is hosted on an external provider
-  if (url.startsWith('http') || url.startsWith('//')) {
-    return url
-  }
-
-  // Otherwise prepend the URL path with the Strapi URL
-  return `${getStrapiURL()}${url}`
+  return `${getDirectusURL()}/assets/${id}`
 }
 
 export function formatDate(dateString: string) {
@@ -52,10 +29,6 @@ export function formatDate(dateString: string) {
   }
   return date.toLocaleDateString('en-US', options)
 }
-
-// ADDS DELAY TO SIMULATE SLOW API REMOVE FOR PRODUCTION
-export const delay = (time: number) =>
-  new Promise((resolve) => setTimeout(() => resolve(1), time))
 
 export function userName(user: Partial<DirectusUsers>): string {
   if (!user) {

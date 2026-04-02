@@ -22,9 +22,6 @@ const getMockTeam = (): Team[] => [
 ]
 
 export const fetchTeamMembers = async (siteId?: string, blockId?: string): Promise<Team[]> => {
-  console.log('\n=== Fetch Team Members ===')
-  console.log('Site ID:', siteId)
-  console.log('Block ID:', blockId)
 
   const result = await safeApiCall(async () => {
     const team = await directus.request(
@@ -43,11 +40,8 @@ export const fetchTeamMembers = async (siteId?: string, blockId?: string): Promi
     ) as Team[]
 
     if (!team.length) {
-      console.log('❌ No team members found')
       return []
     }
-
-    console.log('✅ Team members found:', team.length)
 
     return team
   }, getMockTeam(), 'fetchTeamMembers()')

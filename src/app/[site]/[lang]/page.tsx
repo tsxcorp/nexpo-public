@@ -18,22 +18,12 @@ export default async function Page({ params, searchParams }: PageProps) {
   // Construct the current pathname on the server side
   const currentPathname = `/${site}/${lang}`;
 
-  console.log('\n=== Page Component Debug ===');
-  console.log('Site:', site);
-  console.log('Language:', lang);
-  console.log('Current Pathname:', currentPathname);
-
   // Fetch navigation (main/footer)
   const [mainNav, footerNav, siteData] = await Promise.all([
     fetchNavigationSafe(site, lang, 'header'),
     fetchNavigationSafe(site, lang, 'footer'),
     getSite(site)
   ]);
-
-  console.log('\n=== Navigation Data ===');
-  console.log('Header Navigation:', mainNav);
-  console.log('Footer Navigation:', footerNav);
-  console.log('Site Data:', siteData);
 
   // Fetch homepage
   const pageContent = await fetchPage(site, lang, '/') as (Page & {
@@ -72,7 +62,6 @@ export default async function Page({ params, searchParams }: PageProps) {
   ]);
 
   if (!pageContent) {
-    console.log('\nNo page content found, showing 404');
     // If no page found, return 404
     return (
       <>

@@ -109,7 +109,7 @@ function TheHeaderContent({ navigation, lang, site, siteData, translations, path
                   priority
                 />
               ) : (
-                <span className="font-bold text-base md:text-xl uppercase" style={{ color: `var(--color-primary)` }}>
+                <span className="font-bold text-base md:text-xl uppercase text-[var(--color-primary)]">
                   {siteData?.name || site?.title || 'Site'}
                 </span>
               )}
@@ -126,7 +126,7 @@ function TheHeaderContent({ navigation, lang, site, siteData, translations, path
                     </p>
                   )}
                   {venue && (
-                    <p className="text-[10px] md:text-sm font-bold uppercase leading-tight line-clamp-2" style={{ color: 'var(--color-primary)' }}>
+                    <p className="text-[10px] md:text-sm font-bold uppercase leading-tight line-clamp-2 text-[var(--color-primary)]">
                       {venue}
                     </p>
                   )}

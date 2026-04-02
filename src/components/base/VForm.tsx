@@ -70,7 +70,6 @@ function separateFieldsByGroup(schema: FormField[] = []) {
 
 function VForm(props: FormProps) {
   const { form } = props
-  console.log('🔴 VForm RENDERING - Schema Length:', form.schema?.length);
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -84,16 +83,10 @@ function VForm(props: FormProps) {
   const schema = useMemo(() => transformSchema(form.schema || []), [form.schema])
   const { leadFields, groupFields } = useMemo(() => separateFieldsByGroup(schema), [schema])
   
-  console.log('VForm - Lead fields:', leadFields);
-  console.log('VForm - Group fields:', groupFields);
-  console.log('VForm - Form allows groups:', form.is_allow_group);
-
   const hookForm = useForm<any>()
 
   // Logic điều kiện form
   const { visible, fieldOptions, fieldDisabled, fieldRequired } = useFormConditions(schema as any, hookForm)
-
-  console.log('useFormConditions result:', { visible, fieldDisabled, fieldRequired });
 
   // Add new group section
   const addGroupSection = () => {
@@ -286,7 +279,6 @@ function VForm(props: FormProps) {
   const renderField = (element: any, sectionIndex?: number) => {
     const fieldName = sectionIndex !== undefined ? `group_${sectionIndex}_${element.name}` : element.name
     
-    console.log(`Rendering field: ${element.label} (ID: ${element.id}) with registered name: ${fieldName}`);
     if (visible[element.id || element.name] === false) return null;
 
     return (

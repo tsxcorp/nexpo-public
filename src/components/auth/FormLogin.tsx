@@ -33,11 +33,9 @@ export default function FormLogin() {
       //     body: JSON.stringify({ identifier: email.trim(), password: password }),
       //   })
 
-      console.log('Access token', access_token)
-      console.log('Refersh token', refresh_token)
       setSubmitting(false)
     } catch (error) {
-      console.log(error)
+      console.error('[FormLogin] Auth error:', error)
     }
   }
 

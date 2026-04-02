@@ -67,8 +67,6 @@ export default function HelpFeedbackForm(props: any) {
         body: JSON.stringify(body),
       })
 
-      console.log(response.data.value)
-
       setFeedback({ ...feedback, id: response.data.value.id })
 
       // If the response has comments, we can assume they've completed the second step.

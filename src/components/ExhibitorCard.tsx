@@ -1,6 +1,7 @@
 'use client'
 import Image from 'next/image'
 import { getDirectusMedia } from '@/lib/utils/directus-helpers'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 import type { ExhibitorEvent, ExhibitorTranslation } from '@/directus/types'
 
 interface ExhibitorCardProps {
@@ -8,19 +9,9 @@ interface ExhibitorCardProps {
   lang: string
 }
 
-function getTranslation(translations: ExhibitorTranslation[] | undefined, lang: string) {
-  if (!translations?.length) return null
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  return (
-    translations.find(t => t.languages_code === directusLang) ??
-    translations.find(t => t.languages_code?.startsWith(lang)) ??
-    translations[0]
-  )
-}
-
 export default function ExhibitorCard({ exhibitor, lang }: ExhibitorCardProps) {
   const ex = exhibitor.exhibitor_id
-  const translation = getTranslation(ex?.translations, lang)
+  const translation = findTranslation(ex?.translations, lang)
   const companyName = translation?.company_name ?? exhibitor.nameboard ?? '—'
   const logoUrl = ex?.logo ? getDirectusMedia(typeof ex.logo === 'string' ? ex.logo : (ex.logo as any)?.id) : null
 
@@ -58,8 +49,7 @@ export default function ExhibitorCard({ exhibitor, lang }: ExhibitorCardProps) {
       {/* Featured badge */}
       {exhibitor.is_featured && (
         <span
-          className="mt-2 inline-block text-xs font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: 'var(--color-primary)', color: '#fff' }}
+          className="mt-2 inline-block text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--color-primary)] text-white"
         >
           ★ Featured
         </span>
@@ -71,8 +61,7 @@ export default function ExhibitorCard({ exhibitor, lang }: ExhibitorCardProps) {
           href={ex.website}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ color: 'var(--color-primary)' }}
+          className="mt-3 text-xs opacity-0 group-hover:opacity-100 transition-opacity text-[var(--color-primary)]"
           onClick={e => e.stopPropagation()}
         >
           Visit website →
