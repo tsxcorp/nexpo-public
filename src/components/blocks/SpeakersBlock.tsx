@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { getDirectusMedia } from '@/lib/utils/directus-helpers';
+import { findTranslation } from '@/lib/utils/translation-helpers';
 import type { Speaker } from '@/directus/types';
 
 interface SpeakersBlockData {
@@ -15,8 +16,7 @@ interface Props {
 }
 
 export default function SpeakersBlock({ data, lang, speakers }: Props) {
-  const title = data.translations?.find(t => t.languages_code?.startsWith(lang))?.title
-    || data.translations?.[0]?.title;
+  const title = findTranslation(data.translations, lang)?.title;
 
   const items = data.max_count ? speakers.slice(0, data.max_count) : speakers;
 
@@ -25,14 +25,13 @@ export default function SpeakersBlock({ data, lang, speakers }: Props) {
   return (
     <section className="py-12 px-4 md:px-8 lg:px-16">
       {title && (
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10" style={{ color: 'var(--color-primary)' }}>
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10" className="text-[var(--color-primary)]">
           {title}
         </h2>
       )}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {items.map((speaker, idx) => {
-          const trans = speaker.translations?.find(t => t.languages_code?.startsWith(lang))
-            || speaker.translations?.[0];
+          const trans = findTranslation(speaker.translations, lang);
           const name = trans?.name || speaker.name || '';
           const position = trans?.title || speaker.position || '';
           const company = trans?.company || speaker.company || '';
@@ -53,12 +52,12 @@ export default function SpeakersBlock({ data, lang, speakers }: Props) {
                     width={96}
                     height={96}
                     className="w-24 h-24 rounded-full object-cover border-2 shadow-sm"
-                    style={{ borderColor: 'var(--color-primary)' }}
+                    className="border-[var(--color-primary)]"
                   />
                 ) : (
                   <div
                     className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-sm"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
+                    className="bg-[var(--color-primary)]"
                   >
                     {name.charAt(0)}
                   </div>
@@ -72,8 +71,7 @@ export default function SpeakersBlock({ data, lang, speakers }: Props) {
               )}
               {company && (
                 <p
-                  className="text-xs font-semibold mt-1 leading-tight"
-                  style={{ color: 'var(--color-primary)' }}
+                  className="text-xs font-semibold mt-1 leading-tight text-[var(--color-primary)]"
                 >
                   {company}
                 </p>

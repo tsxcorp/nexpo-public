@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState } from 'react'
 import VIcon from '@/components/base/VIcon'
 import TypographyTitle from '@/components/typography/TypographyTitle'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
@@ -7,6 +7,14 @@ import BlockContainer from '@/components/BlockContainer'
 import { getDirectusMedia } from '@/lib/utils/directus-helpers'
 import Image from 'next/image'
 import clsx from 'clsx'
+import { findTranslation } from '@/lib/utils/translation-helpers'
+
+interface TestimonialTranslation {
+  languages_code: string
+  title?: string
+  subtitle?: string
+  content?: string
+}
 
 interface Testimonial {
   id: string | number
@@ -17,12 +25,7 @@ interface Testimonial {
   company_logo: string
   link: string
   content: string
-  translations?: Array<{
-    title?: string
-    subtitle?: string
-    content?: string
-    languages_code: string
-  }>
+  translations?: TestimonialTranslation[]
 }
 
 interface Testimonials {
@@ -45,40 +48,14 @@ interface TestimonialsBlockProps {
 }
 
 export default function TestimonialsBlock({ data, lang }: TestimonialsBlockProps) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const headline = translation?.headline || data.headline || ''
   const subtitle = translation?.subtitle || data.subtitle || ''
 
-  // Debug: log the raw testimonials array
-  console.log('[TestimonialsBlock] data.testimonials:', data.testimonials)
-  if (Array.isArray(data.testimonials)) {
-    data.testimonials.forEach((item, idx) => {
-      if (item && 'testimonial' in item && item.testimonial) {
-        console.log(`[TestimonialsBlock] Testimonial ${idx} id:`, item.testimonial.id)
-        console.log(`[TestimonialsBlock] Testimonial ${idx} full:`, item.testimonial)
-      } else if (item && 'testimonials_id' in item) {
-        console.log(`[TestimonialsBlock] Testimonial ${idx} testimonials_id:`, (item as any).testimonials_id)
-      }
-    })
-  }
-
   const testimonialContainer = useRef<HTMLDivElement>(null)
   const testimonialRefs = useRef<HTMLDivElement[]>([])
   const [currentItemIdx, setCurrentItemIdx] = useState(0)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-      console.log('[TestimonialsBlock] CSS Variables:')
-      console.log('--color-primary:', bodyStyles.getPropertyValue('--color-primary'))
-      console.log('--font-body:', bodyStyles.getPropertyValue('--font-body'))
-      console.log('--font-display:', bodyStyles.getPropertyValue('--font-display'))
-      console.log('--font-code:', bodyStyles.getPropertyValue('--font-code'))
-    }
-  }, [])
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const testimonialWidth = testimonialRefs.current[0].offsetWidth
@@ -213,7 +190,10 @@ export default function TestimonialsBlock({ data, lang }: TestimonialsBlockProps
             .filter(item => item && (("testimonial" in item && item.testimonial?.id) || ("testimonials_id" in item && (item as any).testimonials_id)))
             .map((item, itemIdx) => {
               const testimonial = "testimonial" in item ? item.testimonial : (item as any).testimonials_id;
-              const testimonialTranslation = testimonial.translations?.find((t: any) => t.languages_code === directusLang) || testimonial.translations?.[0];
+              const testimonialTranslation = findTranslation<TestimonialTranslation>(
+                (testimonial.translations as TestimonialTranslation[] | undefined),
+                lang
+              );
               const testimonialTitle = testimonialTranslation?.title || testimonial.title;
               const testimonialSubtitle = testimonialTranslation?.subtitle || testimonial.subtitle;
               const testimonialContent = testimonialTranslation?.content || testimonial.content;

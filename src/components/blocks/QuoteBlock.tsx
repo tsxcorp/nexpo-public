@@ -1,9 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
-import { getDirectusMedia } from '@/lib/utils/directus-helpers'
 import BlockContainer from '@/components/BlockContainer'
-import { useEffect } from 'react'
-import Image from 'next/image'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface Quote {
   id: string
@@ -28,18 +26,10 @@ interface QuoteBlockProps {
 }
 
 export default function QuoteBlock({ data, lang }: QuoteBlockProps) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const subtitle = translation?.subtitle || data.subtitle || ''
   const content = translation?.content || data.content || ''
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-    }
-  }, [])
 
   return (
     <BlockContainer className="py-16 px-4">

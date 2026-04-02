@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import BlockContainer from '@/components/BlockContainer'
 import TypographyTitle from '@/components/typography/TypographyTitle'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
 import { VAccordion } from '@/components/base/VAccordion'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface Faq {
   title: string
@@ -28,26 +29,10 @@ interface Props {
 }
 
 export default function FaqsBlock({ data, lang }: Props) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const headline = translation?.headline || data.headline || ''
-  const faqs = useMemo(() => translation?.faqs || [], [translation?.faqs])
-
-  useEffect(() => {
-    console.log('\n=== FAQs Block Data ===')
-    console.log('Block Data:', {
-      id: data.id,
-      title,
-      headline,
-      faqsCount: faqs.length
-    })
-    console.log('FAQs:', faqs.map(faq => ({
-      title: faq.title,
-      answer: faq.answer
-    })))
-  }, [data, title, headline, faqs])
+  const faqs = useMemo(() => translation?.faqs || [], [translation])
 
   return (
     <BlockContainer className='mx-auto max-w-screen-xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8'>

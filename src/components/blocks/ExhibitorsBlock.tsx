@@ -1,5 +1,6 @@
 import React from 'react';
 import { getDirectusMedia } from '@/lib/utils/directus-helpers';
+import { findTranslation } from '@/lib/utils/translation-helpers';
 import type { ExhibitorEvent } from '@/directus/types';
 
 interface ExhibitorsBlockData {
@@ -15,8 +16,7 @@ interface Props {
 }
 
 export default function ExhibitorsBlock({ data, lang, exhibitors }: Props) {
-  const title = data.translations?.find(t => t.languages_code?.startsWith(lang))?.title
-    || data.translations?.[0]?.title;
+  const title = findTranslation(data.translations, lang)?.title;
 
   let items = exhibitors;
   if (data.show_featured_only) items = items.filter(e => e.is_featured);
@@ -27,7 +27,7 @@ export default function ExhibitorsBlock({ data, lang, exhibitors }: Props) {
   return (
     <section className="py-12 px-4 md:px-8 lg:px-16">
       {title && (
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10" style={{ color: 'var(--color-primary)' }}>
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10" className="text-[var(--color-primary)]">
           {title}
         </h2>
       )}
@@ -35,8 +35,7 @@ export default function ExhibitorsBlock({ data, lang, exhibitors }: Props) {
         {items.map(ev => {
           const exhibitor = typeof ev.exhibitor_id === 'object' ? ev.exhibitor_id : null;
           if (!exhibitor) return null;
-          const trans = exhibitor.translations?.find(t => t.languages_code?.startsWith(lang))
-            || exhibitor.translations?.[0];
+          const trans = findTranslation(exhibitor.translations, lang);
           const name = trans?.company_name || ev.nameboard || '';
           const logo = exhibitor.logo;
 
@@ -65,7 +64,7 @@ export default function ExhibitorsBlock({ data, lang, exhibitors }: Props) {
               {ev.booth_number && (
                 <span
                   className="text-[10px] font-semibold text-white px-2.5 py-0.5 rounded-full"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
+                  className="bg-[var(--color-primary)]"
                 >
                   Booth {ev.booth_number}
                 </span>

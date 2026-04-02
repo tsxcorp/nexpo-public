@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import VButton from '@/components/base/VButton'
 import BlockContainer from '@/components/BlockContainer'
 import { getDirectusMedia } from '@/lib/utils/directus-helpers'
 import Image from 'next/image'
 import { motion, HTMLMotionProps } from 'framer-motion'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 export interface BlockHeroButton {
   id: string
@@ -38,28 +39,12 @@ interface HeroBlockProps {
 }
 
 export default function HeroBlock({ data, lang }: HeroBlockProps) {
-  // console.log('[HeroBlock] lang prop:', lang)
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  // console.log('[HeroBlock] directusLang:', directusLang)
-  // console.log('[HeroBlock] data.translations:', data.translations)
-  const translations = Array.isArray(data.translations) ? data.translations : [];
-  const translation = translations.find((t: any) => t.languages_code === directusLang) || translations[0];
+  const translation = findTranslation(data.translations, lang);
   const headline = translation?.headline || '';
   const title = translation?.title || '';
   const content = translation?.content || '';
 
   const buttons = data.buttons || data.button_group?.buttons || [];
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body);
-      console.log('[HeroBlock] CSS Variables:');
-      console.log('--color-primary:', bodyStyles.getPropertyValue('--color-primary'));
-      console.log('--font-body:', bodyStyles.getPropertyValue('--font-body'));
-      console.log('--font-display:', bodyStyles.getPropertyValue('--font-display'));
-      console.log('--font-code:', bodyStyles.getPropertyValue('--font-code'));
-    }
-  }, []);
 
   return (
     <BlockContainer className='relative grid gap-6 md:grid-cols-3'>
@@ -75,7 +60,7 @@ export default function HeroBlock({ data, lang }: HeroBlockProps) {
         </p>
         <div className='flex flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0'>
           {buttons.map((button) => {
-            const btnTrans = button.translations?.find(t => t.languages_code === directusLang)
+            const btnTrans = findTranslation(button.translations, lang)
             return (
               <VButton
                 key={button.id}

@@ -3,6 +3,7 @@ import BlockContainer from '@/components/BlockContainer'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
 import TypographyTitle from '@/components/typography/TypographyTitle'
 import VGallery from '@/components/base/VGallery'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 export interface Gallery {
   id: string
@@ -32,27 +33,9 @@ interface GalleryBlockProps {
 }
 
 function GalleryBlock({ data, lang, className }: GalleryBlockProps) {
-  // Get translated content based on language
-  const translation =
-    data.translations?.find(
-      t =>
-        t.languages_code === lang ||
-        t.languages_code?.toLowerCase().startsWith(lang.toLowerCase() + '-')
-    );
+  const translation = findTranslation(data.translations, lang);
   const title = translation?.title || data.title
   const headline = translation?.headline || data.headline
-
-  // Debug logging
-  console.log('[GalleryBlock] Data:', {
-    id: data.id,
-    defaultTitle: data.title,
-    defaultHeadline: data.headline,
-    translations: data.translations,
-    currentLang: lang,
-    selectedTranslation: translation,
-    finalTitle: title,
-    finalHeadline: headline
-  })
 
   return (
     <div className={`modern-gallery-block ${className || ''}`}>

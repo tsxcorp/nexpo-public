@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client' // add this line make famer-motion works.
 
-import React, { useEffect } from 'react'
+import React from 'react'
 import BlockContainer from '@/components/BlockContainer'
 import TypographyTitle from '@/components/typography/TypographyTitle'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
@@ -9,6 +9,7 @@ import { getDirectusMedia } from '@/lib/utils/directus-helpers'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import '@/styles/logo-marquee.css'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface LogoCloudBlockProps {
   id: string
@@ -39,22 +40,9 @@ interface Props {
 }
 
 export default function LogoCloudBlock({ data, lang }: Props) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const headline = translation?.headline || data.headline || ''
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-      console.log('[LogoCloudBlock] CSS Variables:')
-      console.log('--color-primary:', bodyStyles.getPropertyValue('--color-primary'))
-      console.log('--font-body:', bodyStyles.getPropertyValue('--font-body'))
-      console.log('--font-display:', bodyStyles.getPropertyValue('--font-display'))
-      console.log('--font-code:', bodyStyles.getPropertyValue('--font-code'))
-    }
-  }, [])
 
   return (
     <BlockContainer className='mx-auto max-w-8xl px-4 py-16 sm:px-6 lg:px-8'>

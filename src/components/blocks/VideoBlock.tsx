@@ -4,7 +4,8 @@ import BlockContainer from '@/components/BlockContainer'
 import TypographyTitle from '@/components/typography/TypographyTitle'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
 import VVideo from '@/components/base/VVideo'
-import { useMemo, useEffect } from 'react'
+import { useMemo } from 'react'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface Video {
   id: string
@@ -26,9 +27,7 @@ interface VideoBlockProps {
 }
 
 export default function VideoBlock({ data, lang }: VideoBlockProps) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const headline = translation?.headline || data.headline || ''
 
@@ -41,17 +40,6 @@ export default function VideoBlock({ data, lang }: VideoBlockProps) {
     }
     return null
   }, [data.type, data.video_file, data.video_url])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-      console.log('[VideoBlock] CSS Variables:')
-      console.log('--color-primary:', bodyStyles.getPropertyValue('--color-primary'))
-      console.log('--font-body:', bodyStyles.getPropertyValue('--font-body'))
-      console.log('--font-display:', bodyStyles.getPropertyValue('--font-display'))
-      console.log('--font-code:', bodyStyles.getPropertyValue('--font-code'))
-    }
-  }, [])
 
   return (
     <BlockContainer className='mx-auto max-w-4xl py-12 text-center'>

@@ -6,6 +6,7 @@ import { useIntersection } from 'react-use'
 import directusApi from '@/directus/client'
 import { readItems } from '@directus/sdk'
 import BlockContainer from '@/components/BlockContainer'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 import TypographyTitle from '@/components/typography/TypographyTitle'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
 import TypographyProse from '@/components/typography/TypographyProse'
@@ -60,23 +61,11 @@ const socialIcons: Record<string, ReactElement> = {
 }
 
 const TeamBlock = ({ data, lang, teams = [] }: TeamBlockProps) => {
-  console.log('[TeamBlock] teams prop:', teams);
-  teams.forEach((member, idx) => {
-    console.log(`[TeamBlock] member ${idx}:`, member);
-  });
-
   // Translation logic
-  const translation =
-    data.translations?.find(
-      t =>
-        t.languages_code === lang ||
-        (t.languages_code && lang && t.languages_code.toLowerCase().startsWith(lang.toLowerCase() + '-'))
-    );
+  const translation = findTranslation(data.translations, lang);
   const title = translation?.title || data.title;
   const headline = translation?.headline || data.headline;
   const content = translation?.content || data.content;
-
-  console.log('[TeamBlock] teams:', teams);
 
   return (
     <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -105,21 +94,9 @@ const TeamBlock = ({ data, lang, teams = [] }: TeamBlockProps) => {
               } else if (member.image && typeof member.image === 'object' && 'id' in member.image) {
                 imageUrl = getDirectusMedia(member.image.id);
               }
-              const memberTranslation = member.translations?.find(
-                t => t.languages_code === lang || (t.languages_code && lang && t.languages_code.toLowerCase().startsWith(lang.toLowerCase() + '-'))
-              );
+              const memberTranslation = findTranslation(member.translations, lang);
               const displayJobTitle = memberTranslation?.job_title || member.job_title;
               const displayBio = memberTranslation?.bio || member.bio;
-              console.log(`[TeamBlock] member ${idx}:`, {
-                id: member.id,
-                name: member.name,
-                job_title: member.job_title,
-                bio: member.bio,
-                translations: member.translations,
-                selectedTranslation: memberTranslation,
-                displayJobTitle,
-                displayBio
-              });
               return (
                 <div
                   key={member.id || idx}

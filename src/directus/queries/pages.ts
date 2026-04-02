@@ -3,23 +3,7 @@ import directus from '../client'
 import { withRevalidate, safeApiCall } from '../utils'
 import type { Page } from '../types'
 import { getSite } from './sites'
-
-// Mock data for fallback when Directus is not available
-const getMockPage = (siteSlug: string, lang: string, slug: string): Page => ({
-  id: '1',
-  status: 'published',
-  site_id: '1',
-  title: 'Mock Page',
-  translations: [
-    {
-      id: '1',
-      languages_code: lang,
-      title: 'Mock Page',
-      permalink: `/${slug}`,
-      blocks: []
-    }
-  ]
-})
+import { toDirectusLang } from '@/lib/utils/translation-helpers'
 
 // --- Field fragments for blocks ---
 const blockFormFields = [
@@ -103,13 +87,11 @@ const blockItemFields = [
   { video: ['*', { translations: ['*'] }] },
 ];
 
-const langMap = { 'vi': 'vi-VN', 'en': 'en-US' } as const;
-
 export const fetchPage = async (siteSlug: string, lang: string, permalink: string = '/') => {
   const site = await getSite(siteSlug);
   if (!site) return null;
 
-  const langCode = langMap[lang as keyof typeof langMap] || lang;
+  const langCode = toDirectusLang(lang);
 
   return await safeApiCall(async () => {
     const pages = await directus.request(
@@ -117,6 +99,7 @@ export const fetchPage = async (siteSlug: string, lang: string, permalink: strin
         readItems('pages' as any, {
           filter: {
             site_id: { _eq: site.id },
+            status: { _eq: 'published' },
             translations: { permalink: { _eq: permalink } },
           },
           fields: [
@@ -151,31 +134,6 @@ export const fetchPage = async (siteSlug: string, lang: string, permalink: strin
 
     if (!pages[0]) return null;
 
-    // Debug logs
-    console.log('[fetchPage] Full Page Data:', JSON.stringify(pages[0], null, 2));
-    const blocks = (pages[0].blocks ?? []) as any[];
-    if (Array.isArray(blocks)) {
-      console.log('[fetchPage] Blocks:', JSON.stringify(blocks, null, 2));
-      blocks.forEach((block: any, index: number) => {
-        if (block.item?.button_group) {
-          console.log(`[fetchPage] Block ${index} button_group:`, JSON.stringify(block.item.button_group, null, 2));
-          if (block.item.button_group.buttons) {
-            console.log(`[fetchPage] Block ${index} buttons:`, JSON.stringify(block.item.button_group.buttons, null, 2));
-          }
-        }
-        if (block.item?.rows) {
-          console.log(`[fetchPage] Block ${index} rows:`, JSON.stringify(block.item.rows, null, 2));
-          if (Array.isArray(block.item.rows)) {
-            block.item.rows.forEach((row: any, rowIndex: number) => {
-              console.log(`[fetchPage] Block ${index} Row ${rowIndex}:`, JSON.stringify(row, null, 2));
-            });
-          }
-        }
-      });
-    } else {
-      console.log('[fetchPage] No blocks found in pages.');
-    }
-
     return pages[0];
-  }, getMockPage(siteSlug, langCode, permalink) as any, `fetchPage(${siteSlug}, ${lang}, ${permalink})`);
+  }, null, `fetchPage(${siteSlug}, ${lang}, ${permalink})`);
 } 

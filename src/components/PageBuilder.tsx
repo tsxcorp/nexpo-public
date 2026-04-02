@@ -21,6 +21,7 @@ import SpeakersBlock from '@/components/blocks/SpeakersBlock'
 import AgendaPreviewBlock from '@/components/blocks/AgendaPreviewBlock'
 import CountdownBlock from '@/components/blocks/CountdownBlock'
 import EventInfoBlock from '@/components/blocks/EventInfoBlock'
+import DividerBlock from '@/components/blocks/DividerBlock'
 import type { ExhibitorEvent, Speaker, AgendaSession, EventBasicInfo } from '@/directus/types'
 
 interface PageBuilderProps {
@@ -48,57 +49,63 @@ export default function PageBuilder({
   const agendaUrl = site ? `/${site}/${lang}/agenda` : undefined;
   const registerUrl = site ? `/${site}/${lang}/register` : undefined;
 
+  // Filter out hidden blocks before rendering
+  const visibleBlocks = blocks.filter(b => !b.hide_block)
+
   return (
     <>
-      {blocks.map((block, index) => {
+      {visibleBlocks.map((block, index) => {
         // Guard: skip blocks with null/undefined items to prevent crashes
         if (!block.item) return null
 
         switch (block.collection) {
           case 'block_features':
-            return <FeaturesBlock key={index} data={block.item} lang={lang} />
+            return <FeaturesBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_richtext':
-            return <RichTextBlock key={index} data={block.item} lang={lang} />
+            return <RichTextBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_hero':
-            return <HeroBlock key={index} data={block.item} lang={lang} />
+            return <HeroBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_gallery':
-            return <GalleryBlock key={index} data={block.item} lang={lang} />
+            return <GalleryBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_quote':
-            return <QuoteBlock key={index} data={block.item} lang={lang} />
+            return <QuoteBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_logocloud':
-            return <LogoCloudBlock key={index} data={block.item} lang={lang} />
+            return <LogoCloudBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_video':
-            return <VideoBlock key={index} data={block.item} lang={lang} />
+            return <VideoBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_testimonials':
-            return <TestimonialsBlock key={index} data={block.item} lang={lang} />
+            return <TestimonialsBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_steps':
-            return <StepsBlock key={index} data={block.item} lang={lang} />
+            return <StepsBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_faqs':
-            return <FaqsBlock key={index} data={block.item} lang={lang} />
+            return <FaqsBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_cta':
-            return <CtaBlock key={index} data={block.item} lang={lang} />
+            return <CtaBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_html':
-            return <RawHtmlBlock key={index} data={block.item} lang={lang} />
+            return <RawHtmlBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_columns':
-            return <ColumnsBlock key={index} data={block.item} lang={lang} />
+            return <ColumnsBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_cardgroup':
-            return <CardGroupBlock key={index} data={block.item} lang={lang} />
+            return <CardGroupBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_team':
-            return <TeamBlock key={index} data={block.item} lang={lang} teams={block.item.team || []} />
+            return <TeamBlock key={block.id || index} data={block.item} lang={lang} teams={block.item.team || []} />
           case 'block_form':
-            return <FormBlock key={index} data={block.item} lang={lang} />
+            return <FormBlock key={block.id || index} data={block.item} lang={lang} />
 
           // Event data blocks
           case 'block_exhibitors':
-            return <ExhibitorsBlock key={index} data={block.item} lang={lang} exhibitors={exhibitors} />
+            return <ExhibitorsBlock key={block.id || index} data={block.item} lang={lang} exhibitors={exhibitors} />
           case 'block_speakers':
-            return <SpeakersBlock key={index} data={block.item} lang={lang} speakers={speakers} />
+            return <SpeakersBlock key={block.id || index} data={block.item} lang={lang} speakers={speakers} />
           case 'block_agenda_preview':
-            return <AgendaPreviewBlock key={index} data={block.item} lang={lang} agendaSessions={agendaSessions} agendaUrl={agendaUrl} />
+            return <AgendaPreviewBlock key={block.id || index} data={block.item} lang={lang} agendaSessions={agendaSessions} agendaUrl={agendaUrl} />
           case 'block_countdown':
-            return <CountdownBlock key={index} data={block.item} lang={lang} eventStartDate={event?.start_date} />
+            return <CountdownBlock key={block.id || index} data={block.item} lang={lang} eventStartDate={event?.start_date} />
           case 'block_event_info':
-            return <EventInfoBlock key={index} data={block.item} lang={lang} event={event} registerUrl={registerUrl} />
+            return <EventInfoBlock key={block.id || index} data={block.item} lang={lang} event={event} registerUrl={registerUrl} />
+
+          case 'block_divider':
+            return <DividerBlock key={block.id || index} />
 
           default:
             return null

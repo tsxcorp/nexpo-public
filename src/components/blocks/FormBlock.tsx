@@ -3,6 +3,7 @@ import { Forms } from '@/directus/types'
 import BlockContainer from '@/components/BlockContainer'
 import TypographyTitle from '@/components/typography/TypographyTitle'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
+import { findTranslation, toDirectusLang } from '@/lib/utils/translation-helpers'
 
 interface FormBlockProps {
   title?: string
@@ -22,94 +23,29 @@ interface FormBlockComponentProps {
 }
 
 const FormBlock = ({ data, lang }: FormBlockComponentProps) => {
-  console.log('FormBlock - Initial data:', data);
-  console.log('FormBlock - Language:', lang);
-
   if (!data || !data.form) {
-    console.log('FormBlock - No data or form found');
     return null;
   }
 
-  // Map language code to match Directus format
-  // This mapping can be extended for more languages
-  const getDirectusLangCode = (lang: string): string => {
-    // Default mapping for common languages
-    const langMap: Record<string, string> = {
-      'vi': 'vi-VN',
-      'en': 'en-US',
-      'fr': 'fr-FR',
-      'de': 'de-DE',
-      'es': 'es-ES',
-      'it': 'it-IT',
-      'ja': 'ja-JP',
-      'ko': 'ko-KR',
-      'zh': 'zh-CN',
-      'pt': 'pt-BR',
-      'ru': 'ru-RU',
-      'ar': 'ar-SA',
-      'hi': 'hi-IN',
-      'th': 'th-TH',
-      'id': 'id-ID',
-      'ms': 'ms-MY',
-      'tr': 'tr-TR',
-      'nl': 'nl-NL',
-      'pl': 'pl-PL',
-      'uk': 'uk-UA',
-    };
+  const directusLang = toDirectusLang(lang);
 
-    // If we have a mapping, use it
-    if (langMap[lang]) {
-      return langMap[lang];
-    }
-
-    // If no mapping exists, try to find a translation that starts with the language code
-    const availableTranslations = data.form.translations || [];
-    const matchingTranslation = availableTranslations.find(t => 
-      t.languages_code.toLowerCase().startsWith(lang.toLowerCase() + '-')
-    );
-
-    // If we found a matching translation, use its language code
-    if (matchingTranslation) {
-      return matchingTranslation.languages_code;
-    }
-
-    // If no mapping or matching translation found, return the original language code
-    return lang;
-  };
-
-  const directusLang = getDirectusLangCode(lang);
-
-  const translation = data.translations?.find(
-    (t) =>
-      t.languages_code === directusLang ||
-      (t.languages_code &&
-        directusLang &&
-        t.languages_code.toLowerCase().startsWith(directusLang.toLowerCase() + '-'))
-  );
-  console.log('FormBlock - Found translation:', translation);
-
+  const translation = findTranslation(data.translations, lang);
   const title = translation?.title || data.title;
   const headline = translation?.headline || data.headline;
 
   // Transform form.fields to schema expected by VForm
   const formWithSchema = {
     ...data.form,
-    // Ensure new form fields are included
     is_allow_group: data.form.is_allow_group || false,
     template_email: data.form.template_email,
     template_email_group: data.form.template_email_group,
     qr_code_field: data.form.qr_code_field,
     schema: (data.form.fields || []).map((field, index) => {
-      console.log('FormBlock - Processing field:', field);
       const fieldTranslation = field?.translations?.find(
         (t) => t.languages_code === directusLang
       );
-      console.log('FormBlock - Field translation:', fieldTranslation);
 
-      // Use field name if available, otherwise fallback to ID
       const fieldName = field?.name || field?.id || `field_${index}`;
-      
-      console.log(`FormBlock - Mapped field ${fieldName} has ${field?.conditions?.length || 0} conditions`);
 
       return {
         id: field?.id || `field_${index}`,
@@ -120,24 +56,20 @@ const FormBlock = ({ data, lang }: FormBlockComponentProps) => {
         help: fieldTranslation?.help || '',
         validation: field?.validation || '',
         width: field?.width || '100',
-        options: fieldTranslation?.options || [], // For select fields
+        options: fieldTranslation?.options || [],
         is_required: field?.is_required || false,
         is_group_field: field?.is_group_field || false,
         is_email_contact: field?.is_email_contact || false,
         event_id: field?.event_id,
         tenant_id: field?.tenant_id,
-        conditions: field?.conditions || [], // CRITICAL: Pass conditions to VForm
+        conditions: field?.conditions || [],
       };
     }),
     submit_label:
-      data.form.translations?.find((t) => t.languages_code === directusLang)
-        ?.submit_label || data.form.submit_label || 'Submit',
+      findTranslation(data.form.translations, lang)?.submit_label || data.form.submit_label || 'Submit',
     success_message:
-      data.form.translations?.find((t) => t.languages_code === directusLang)
-        ?.success_message || data.form.success_message || 'Form submitted successfully',
+      findTranslation(data.form.translations, lang)?.success_message || data.form.success_message || 'Form submitted successfully',
   };
-
-  console.log('FormBlock - Final formWithSchema:', formWithSchema);
 
   return (
     <BlockContainer>

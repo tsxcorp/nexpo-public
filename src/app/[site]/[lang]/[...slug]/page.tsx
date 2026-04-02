@@ -11,60 +11,21 @@ import type { Page } from '@/directus/types';
 import PageBuilder from '@/components/PageBuilder';
 import { PageProps } from '@/types/next';
 
-type BlockTranslation = {
-  languages_code: string;
-  title?: string;
-  headline?: string;
-  content?: string;
-};
-
-type BlockItem = {
-  id: string;
-  translations?: BlockTranslation[];
-  title?: string;
-  headline?: string;
-  content?: string;
-  image?: string;
-  image_position?: string;
-  button_group?: any;
-  gallery_items?: any[];
-};
-
 export default async function SlugPage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
   const { site, lang, slug } = resolvedParams;
 
-  // Construct the current pathname on the server side
   const currentPathname = `/${site}/${lang}${slug && slug.length > 0 ? `/${slug.join('/')}` : ''}`;
 
-  console.log('\n=== Page Component Debug ===');
-  console.log('Site:', site);
-  console.log('Language:', lang);
-  console.log('Slug:', slug);
-  console.log('Current Pathname:', currentPathname);
-
-  // Fetch site data to get siteId (if multi-tenant)
   const siteData = await getSite(site);
 
-  // Fetch navigation (main/footer)
   const [mainNav, footerNav] = await Promise.all([
     fetchNavigationSafe(site, lang, 'header'),
     fetchNavigationSafe(site, lang, 'footer')
   ]);
 
-  console.log('\n=== Navigation Data ===');
-  console.log('Header Navigation:', mainNav);
-  console.log('Footer Navigation:', footerNav);
-  console.log('Site Data:', siteData);
-
-  // Fetch page content
-  // If no slug or slug is empty array, fetch homepage (permalink: "/")
-  // If slug is ['nexpo'], also fetch homepage
   const pageSlug = !slug || slug.length === 0 || (slug.length === 1 && slug[0] === site) ? '/' : `/${slug.join('/')}`;
-  
-  console.log('\n=== Page Fetch Debug ===');
-  console.log('Page Slug:', pageSlug);
-  
+
   const pageContent = await fetchPage(site, lang, pageSlug) as (Page & {
     translations: Array<{
       languages_code: string;
@@ -74,19 +35,6 @@ export default async function SlugPage({ params, searchParams }: PageProps) {
     }>;
     blocks?: any[];
   }) | null;
-
-  console.log('\n=== Page Content Debug ===');
-  console.log('Page Content:', JSON.stringify(pageContent, null, 2));
-  if (pageContent?.blocks) {
-    console.log('\n=== Blocks Debug ===');
-    console.log('Number of blocks:', pageContent.blocks.length);
-    pageContent.blocks.forEach((block, index) => {
-      console.log(`\nBlock ${index + 1}:`);
-      console.log('Collection:', block.collection);
-      console.log('Block ID:', block.id);
-      console.log('Item:', JSON.stringify(block.item, null, 2));
-    });
-  }
 
   // Conditionally fetch event data only for blocks that need it
   const blocks = Array.isArray(pageContent?.blocks) ? pageContent.blocks : [];
@@ -102,28 +50,16 @@ export default async function SlugPage({ params, searchParams }: PageProps) {
   ]);
 
   if (!pageContent) {
-    console.log('\nNo page content found, showing 404');
-    // If no page found, return 404
     return (
       <>
         <TheHeader navigation={mainNav} lang={lang} site={siteData?.slug || site} siteData={siteData} translations={[]} pathname={currentPathname} />
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-          <div className="max-w-2xl mx-auto px-4 py-12">
-            <h1 className="text-3xl font-bold mb-4">404 - Page Not Found</h1>
-            <div className="mb-2">Site: <b>{site}</b></div>
-            <div className="mb-2">Lang: <b>{lang}</b></div>
-            <div className="mb-2">Slug: <b>{pageSlug}</b></div>
-            <div className="mt-4 p-4 bg-gray-100 rounded">
-              <h2 className="font-bold mb-2">Debug Info:</h2>
-              <pre className="text-sm">
-                {JSON.stringify({
-                  params: resolvedParams,
-                  searchParams: await searchParams,
-                  hasMainNav: !!mainNav,
-                  hasFooterNav: !!footerNav
-                }, null, 2)}
-              </pre>
-            </div>
+          <div className="max-w-md mx-auto px-4 py-16 text-center">
+            <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
+            <p className="text-lg text-gray-600 mb-6">Page not found</p>
+            <a href={`/${site}/${lang}`} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity">
+              ← Back to home
+            </a>
           </div>
         </div>
         <TheFooter navigation={footerNav} lang={lang} pathname={currentPathname} />

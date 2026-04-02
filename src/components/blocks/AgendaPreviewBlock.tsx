@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { initTranslations } from '@/i18n/i18n';
+import { findTranslation } from '@/lib/utils/translation-helpers';
 import type { AgendaSession } from '@/directus/types';
 
 interface AgendaPreviewBlockData {
@@ -24,8 +25,7 @@ function formatTime(time: string | null | undefined): string {
 export default async function AgendaPreviewBlock({ data, lang, agendaSessions, agendaUrl }: Props) {
   const { t } = await initTranslations(lang);
 
-  const title = data.translations?.find(tr => tr.languages_code?.startsWith(lang))?.title
-    || data.translations?.[0]?.title;
+  const title = findTranslation(data.translations, lang)?.title;
 
   const featured = agendaSessions.filter(s => s.is_featured || s.status === 'published');
   const items = data.max_items ? featured.slice(0, data.max_items) : featured.slice(0, 5);
@@ -36,14 +36,13 @@ export default async function AgendaPreviewBlock({ data, lang, agendaSessions, a
     <section className="py-12 px-4 md:px-8 lg:px-16">
       <div className="max-w-3xl mx-auto">
         {title && (
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-10" style={{ color: 'var(--color-primary)' }}>
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-10" className="text-[var(--color-primary)]">
             {title}
           </h2>
         )}
         <div className="space-y-3">
           {items.map(session => {
-            const trans = session.translations?.find(tr => tr.languages_code?.startsWith(lang))
-              || session.translations?.[0];
+            const trans = findTranslation(session.translations, lang);
             const sessionTitle = trans?.title || '';
             const start = formatTime(session.start_time);
             const end = formatTime(session.end_time);
@@ -56,7 +55,7 @@ export default async function AgendaPreviewBlock({ data, lang, agendaSessions, a
               >
                 {timeStr && (
                   <div className="flex-shrink-0 w-24 text-center">
-                    <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
+                    <span className="text-sm font-bold text-[var(--color-primary)]">
                       {timeStr}
                     </span>
                     {session.day_number && (
@@ -87,8 +86,7 @@ export default async function AgendaPreviewBlock({ data, lang, agendaSessions, a
           <div className="text-center mt-6">
             <Link
               href={agendaUrl}
-              className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
-              style={{ color: 'var(--color-primary)' }}
+              className="inline-flex items-center gap-1 text-sm font-semibold hover:underline text-[var(--color-primary)]"
             >
               {t('agenda_preview.view_all')} →
             </Link>

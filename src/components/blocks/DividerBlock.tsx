@@ -1,0 +1,3 @@
+export default function DividerBlock() {
+  return <hr className="my-8 border-t border-gray-200" />;
+}

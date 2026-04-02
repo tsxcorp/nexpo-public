@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import BlockContainer from '@/components/BlockContainer'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
 import TypographyProse from '@/components/typography/TypographyProse'
 import TypographyTitle from '@/components/typography/TypographyTitle'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface RichText {
   id: string
@@ -23,18 +24,10 @@ interface RichTextBlockProps {
 }
 
 function RichTextBlock({ data, lang }: RichTextBlockProps) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const headline = translation?.headline || data.headline || ''
   const content = translation?.content || data.content || ''
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-    }
-  }, [])
 
   return (
     <BlockContainer>

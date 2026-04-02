@@ -1,5 +1,5 @@
 import BlockContainer from '@/components/BlockContainer'
-import { useEffect } from 'react'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface RawHtml {
   id: string
@@ -16,21 +16,8 @@ interface RawHtmlBlockProps {
 }
 
 export default function RawHtmlBlock({ data, lang }: RawHtmlBlockProps) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const rawHtml = translation?.raw_html || data.raw_html || ''
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-      console.log('[RawHtmlBlock] CSS Variables:')
-      console.log('--color-primary:', bodyStyles.getPropertyValue('--color-primary'))
-      console.log('--font-body:', bodyStyles.getPropertyValue('--font-body'))
-      console.log('--font-display:', bodyStyles.getPropertyValue('--font-display'))
-      console.log('--font-code:', bodyStyles.getPropertyValue('--font-code'))
-    }
-  }, [])
 
   return (
     <BlockContainer>

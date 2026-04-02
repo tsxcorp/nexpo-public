@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { findTranslation } from '@/lib/utils/translation-helpers';
 
 interface CountdownBlockData {
   translations?: { languages_code: string; title?: string }[];
@@ -29,8 +30,7 @@ export default function CountdownBlock({ data, lang, eventStartDate }: Props) {
   const targetDate = data.target_date || eventStartDate;
   const { t } = useTranslation();
 
-  const title = data.translations?.find(tr => tr.languages_code?.startsWith(lang))?.title
-    || data.translations?.[0]?.title;
+  const title = findTranslation(data.translations, lang)?.title;
 
   const [timeLeft, setTimeLeft] = useState<ReturnType<typeof calcTimeLeft> | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -60,7 +60,7 @@ export default function CountdownBlock({ data, lang, eventStartDate }: Props) {
     <section className="py-12 px-4 md:px-8 lg:px-16">
       <div className="max-w-2xl mx-auto text-center">
         {title && (
-          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: 'var(--color-primary)' }}>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8" className="text-[var(--color-primary)]">
             {title}
           </h2>
         )}
@@ -75,7 +75,7 @@ export default function CountdownBlock({ data, lang, eventStartDate }: Props) {
                 <div className="flex flex-col items-center">
                   <div
                     className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center text-white text-2xl md:text-3xl font-bold shadow-lg"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
+                    className="bg-[var(--color-primary)]"
                   >
                     {mounted && timeLeft ? String(timeLeft[unit]).padStart(2, '0') : '--'}
                   </div>

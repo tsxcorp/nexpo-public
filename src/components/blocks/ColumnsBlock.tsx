@@ -7,7 +7,7 @@ import BlockContainer from '@/components/BlockContainer'
 import { getDirectusMedia } from '@/lib/utils/directus-helpers'
 import { motion } from 'framer-motion'
 import { BlockColumns, BlockColumnsRows } from '@/directus/types'
-import { useEffect } from 'react'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface RowTranslation {
   title?: string
@@ -35,24 +35,9 @@ interface ColumnsBlockProps {
 }
 
 function ColumnsBlock({ data, lang }: ColumnsBlockProps) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const headline = translation?.headline || data.headline || ''
-
-  console.log('data:: ', data)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-      console.log('[ColumnsBlock] CSS Variables:')
-      console.log('--color-primary:', bodyStyles.getPropertyValue('--color-primary'))
-      console.log('--font-body:', bodyStyles.getPropertyValue('--font-body'))
-      console.log('--font-display:', bodyStyles.getPropertyValue('--font-display'))
-      console.log('--font-code:', bodyStyles.getPropertyValue('--font-code'))
-    }
-  }, [])
 
   return (
     <BlockContainer className='relative mx-auto w-full max-w-7xl items-center px-5 py-24  md:px-12 lg:px-16'>
@@ -65,7 +50,7 @@ function ColumnsBlock({ data, lang }: ColumnsBlockProps) {
         content={headline} />}
       {data.rows &&
         (data.rows as ExtendedBlockColumnsRows[]).map((row, idx) => {
-          const rowTranslation = row.translations?.find((t: RowTranslation) => t.languages_code === directusLang) || row.translations?.[0]
+          const rowTranslation = findTranslation(row.translations, lang)
           const rowTitle = rowTranslation?.title || row.title || ''
           const rowHeadline = rowTranslation?.headline || row.headline || ''
           const rowContent = rowTranslation?.content || row.content || ''

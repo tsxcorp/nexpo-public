@@ -1,6 +1,6 @@
 import { Link } from '@/lib/navigation'
-import { useEffect } from 'react'
 import BlockContainer from '@/components/BlockContainer'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface FeaturesBlockProps {
   data: {
@@ -42,8 +42,7 @@ function Feature({
   translations,
   lang
 }: Feature & { translations?: Feature['translations'], lang: string }) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translation = translations?.find(t => t.languages_code === directusLang)
+  const translation = findTranslation(translations, lang)
   const translatedTitle = translation?.title || title
   const translatedDescription = translation?.description || description
   const translatedText = translation?.text || text
@@ -78,22 +77,9 @@ function Feature({
 }
 
 export default function FeaturesBlock({ data, lang }: FeaturesBlockProps) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const description = translation?.description || data.description || ''
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-      console.log('[FeaturesBlock] CSS Variables:')
-      console.log('--color-primary:', bodyStyles.getPropertyValue('--color-primary'))
-      console.log('--font-body:', bodyStyles.getPropertyValue('--font-body'))
-      console.log('--font-display:', bodyStyles.getPropertyValue('--font-display'))
-      console.log('--font-code:', bodyStyles.getPropertyValue('--font-code'))
-    }
-  }, [])
 
   return (
     <BlockContainer className='m:py-12lg:py-24'>

@@ -1,6 +1,6 @@
 'use client'
 import './StepBlock.css'
-import React, { useEffect } from 'react'
+import React from 'react'
 import BlockContainer from '@/components/BlockContainer'
 import TypographyTitle from '@/components/typography/TypographyTitle'
 import TypographyHeadline from '@/components/typography/TypographyHeadline'
@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { isEven } from '@/lib/utils/math'
 import { BlockSteps } from '@/directus/types'
+import { findTranslation } from '@/lib/utils/translation-helpers'
 
 interface StepsBlockProps {
   data: BlockSteps & {
@@ -33,22 +34,9 @@ interface StepsBlockProps {
 }
 
 export default function StepsBlock({ data, lang }: StepsBlockProps) {
-  const directusLang = lang === 'en' ? 'en-US' : 'vi-VN'
-  const translations = Array.isArray(data.translations) ? data.translations : []
-  const translation = translations.find(t => t.languages_code === directusLang) || translations[0]
+  const translation = findTranslation(data.translations, lang)
   const title = translation?.title || data.title || ''
   const headline = translation?.headline || data.headline || ''
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const bodyStyles = window.getComputedStyle(document.body)
-      console.log('[StepsBlock] CSS Variables:')
-      console.log('--color-primary:', bodyStyles.getPropertyValue('--color-primary'))
-      console.log('--font-body:', bodyStyles.getPropertyValue('--font-body'))
-      console.log('--font-display:', bodyStyles.getPropertyValue('--font-display'))
-      console.log('--font-code:', bodyStyles.getPropertyValue('--font-code'))
-    }
-  }, [])
 
   return (
     <BlockContainer className='mx-auto max-w-4xl text-center'>
@@ -62,7 +50,7 @@ export default function StepsBlock({ data, lang }: StepsBlockProps) {
       {data.steps && (
         <div className='mt-8'>
           {data.steps.map((step, stepIdx) => {
-            const stepTranslation = step.translations?.find(t => t.languages_code === directusLang) || step.translations?.[0]
+            const stepTranslation = findTranslation(step.translations, lang)
             const stepTitle = stepTranslation?.title || step.title || ''
             const stepContent = stepTranslation?.content || step.content || ''
 
