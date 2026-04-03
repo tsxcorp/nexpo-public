@@ -2,7 +2,7 @@
 
 import { useTranslation } from 'react-i18next'
 import { getDirectusMedia } from '@/lib/utils/directus-helpers'
-import type { FloorPlan, Booth, BoothType } from '@/directus/queries/floor-plans'
+import type { FloorPlan, Booth, BoothType, PublicZone } from '@/directus/queries/floor-plans'
 import type { MapInteractionHandlers } from './hooks/use-map-interaction'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -16,6 +16,7 @@ interface Props {
   floorPlan: FloorPlan
   booths: Booth[]
   boothTypes: BoothType[]
+  zones?: PublicZone[]
   selectedBoothId: string | null
   highlightedBoothIds: Set<string>
   isSearching: boolean
@@ -32,6 +33,13 @@ interface Props {
 }
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
+
+const ZONE_COLORS: Record<string, string> = {
+  exhibition_hall: '#3B82F6', conference_room: '#8B5CF6', lobby: '#22C55E',
+  entrance: '#F97316', stage: '#EC4899', food_court: '#EAB308', vip: '#F59E0B',
+  sponsor_area: '#6366F1', registration: '#10B981', networking: '#14B8A6',
+  parking: '#6B7280', booth_area: '#3B82F6', general: '#6B7280', other: '#06B6D4',
+}
 
 function getBoothColor(booth: Booth, boothTypes: BoothType[]): string {
   if (booth.booth_type?.color) return booth.booth_type.color
@@ -60,6 +68,7 @@ export function FloorPlanSvg({
   floorPlan,
   booths,
   boothTypes,
+  zones = [],
   selectedBoothId,
   highlightedBoothIds,
   isSearching,
@@ -108,9 +117,36 @@ export function FloorPlanSvg({
           width={svgWidth}
           height={svgHeight}
           preserveAspectRatio="xMidYMid meet"
-          opacity={0.35}
+          opacity={0.55}
         />
       )}
+
+      {/* Zones */}
+      {zones.map(zone => {
+        const zx = zone.position_x * SCALE
+        const zy = zone.position_y * SCALE
+        const zw = zone.zone_width * SCALE
+        const zh = zone.zone_height * SCALE
+        const zoneColor = zone.color || ZONE_COLORS[zone.zone_type] || ZONE_COLORS.other
+        return (
+          <g key={zone.id}>
+            <rect
+              x={zx} y={zy} width={zw} height={zh}
+              fill={zoneColor} fillOpacity={0.06}
+              stroke={zoneColor} strokeWidth={1.5} strokeOpacity={0.25}
+              strokeDasharray="8 4" rx={4}
+            />
+            <text
+              x={zx + zw / 2} y={zy + 16}
+              textAnchor="middle" fontSize={12}
+              fill={zoneColor} fontWeight="600" opacity={0.5}
+              style={{ pointerEvents: 'none', userSelect: 'none' }}
+            >
+              {zone.name}
+            </text>
+          </g>
+        )
+      })}
 
       {/* Booths */}
       {booths.map(booth => {

@@ -51,6 +51,19 @@ export interface Booth {
   exhibitor_event?: BoothExhibitorEvent | null
 }
 
+export interface PublicZone {
+  id: string
+  name: string
+  zone_type: string
+  position_x: number
+  position_y: number
+  zone_width: number
+  zone_height: number
+  color?: string | null
+  description?: string | null
+  floor_plan_id: string
+}
+
 // ─── Fetch Functions ──────────────────────────────────────────────────────────
 
 export const fetchPublishedFloorPlans = async (eventId: number): Promise<FloorPlan[]> => {
@@ -141,4 +154,32 @@ export const fetchBoothTypesForEvent = async (eventId: number): Promise<BoothTyp
     [],
     `fetchBoothTypesForEvent(eventId=${eventId})`
   )) as BoothType[]
+}
+
+export const fetchZonesForFloorPlans = async (floorPlanIds: string[]): Promise<PublicZone[]> => {
+  if (!floorPlanIds.length) return []
+  return (await safeApiCall(
+    async () => {
+      const items = await directus.request(
+        withRevalidate(
+          readItems('event_zones' as any, {
+            filter: {
+              floor_plan_id: { _in: floorPlanIds },
+              position_x: { _nnull: true },
+            },
+            fields: [
+              'id', 'name', 'zone_type',
+              'position_x', 'position_y', 'zone_width', 'zone_height',
+              'color', 'description', 'floor_plan_id',
+            ],
+            limit: -1,
+          }),
+          60
+        )
+      ) as PublicZone[]
+      return items ?? []
+    },
+    [],
+    `fetchZonesForFloorPlans(planIds=${floorPlanIds.join(',')})`
+  )) as PublicZone[]
 }

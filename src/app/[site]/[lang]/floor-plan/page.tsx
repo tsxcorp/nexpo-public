@@ -4,6 +4,7 @@ import {
   fetchPublishedFloorPlans,
   fetchBoothsForFloorPlans,
   fetchBoothTypesForEvent,
+  fetchZonesForFloorPlans,
 } from '@/directus/queries/floor-plans'
 import { fetchNavigationSafe } from '@/directus/queries/navigation'
 import { initTranslations } from '@/i18n/i18n'
@@ -43,9 +44,11 @@ export default async function FloorPlanPage({ params }: PageProps) {
       ])
     : [[], []]
 
-  // Fetch booths for all published floor plans
+  // Fetch booths + zones for all published floor plans
   const planIds = floorPlans.map(p => p.id)
-  const booths = planIds.length > 0 ? await fetchBoothsForFloorPlans(planIds) : []
+  const [booths, zones] = planIds.length > 0
+    ? await Promise.all([fetchBoothsForFloorPlans(planIds), fetchZonesForFloorPlans(planIds)])
+    : [[], []]
 
   return (
     <>
@@ -74,13 +77,14 @@ export default async function FloorPlanPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Interactive viewer — fills remaining height */}
-        <div className="flex-1 min-h-0 mx-auto w-full max-w-6xl px-0 sm:px-4 pb-4">
-          <div className="h-full rounded-xl overflow-hidden shadow-sm border border-gray-200">
+        {/* Interactive viewer — full-width, fills remaining height */}
+        <div className="flex-1 min-h-0 w-full px-0 sm:px-2 pb-2">
+          <div className="h-full overflow-hidden sm:rounded-xl sm:shadow-sm sm:border sm:border-gray-200">
             <FloorPlanViewer
               floorPlans={floorPlans}
               booths={booths}
               boothTypes={boothTypes}
+              zones={zones}
               lang={lang}
             />
           </div>

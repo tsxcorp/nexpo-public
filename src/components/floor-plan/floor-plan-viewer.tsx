@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import type { FloorPlan, Booth, BoothType } from '@/directus/queries/floor-plans'
+import type { FloorPlan, Booth, BoothType, PublicZone } from '@/directus/queries/floor-plans'
 import { FloorSelector } from './floor-selector'
 import { MapSearchBar } from './map-search-bar'
 import { MapLegend } from './map-legend'
@@ -18,6 +18,7 @@ interface Props {
   floorPlans: FloorPlan[]
   booths: Booth[]
   boothTypes: BoothType[]
+  zones?: PublicZone[]
   lang: string
 }
 
@@ -39,7 +40,7 @@ function getExhibitorSearchText(booth: Booth, lang: string): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function FloorPlanViewer({ floorPlans, booths, boothTypes, lang }: Props) {
+export function FloorPlanViewer({ floorPlans, booths, boothTypes, zones = [], lang }: Props) {
   const { t } = useTranslation()
 
   const [selectedFloorPlanId, setSelectedFloorPlanId] = useState<string>(
@@ -61,6 +62,12 @@ export function FloorPlanViewer({ floorPlans, booths, boothTypes, lang }: Props)
   const activePlanBooths = useMemo(
     () => booths.filter(b => b.floor_plan_id === selectedFloorPlanId),
     [booths, selectedFloorPlanId]
+  )
+
+  // Zones for the active floor plan
+  const activePlanZones = useMemo(
+    () => zones.filter(z => z.floor_plan_id === selectedFloorPlanId),
+    [zones, selectedFloorPlanId]
   )
 
   // Search filtering — returns Set of matching booth IDs
@@ -127,6 +134,7 @@ export function FloorPlanViewer({ floorPlans, booths, boothTypes, lang }: Props)
           floorPlan={activePlan}
           booths={activePlanBooths}
           boothTypes={boothTypes}
+          zones={activePlanZones}
           selectedBoothId={selectedBoothId}
           highlightedBoothIds={highlightedBoothIds}
           isSearching={isSearching}
