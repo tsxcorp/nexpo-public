@@ -74,11 +74,9 @@ export function FloorPlanSvg({
 
   const svgWidth = floorPlan.width * SCALE
   const svgHeight = floorPlan.height * SCALE
-  // Cache-bust background image URL using date_updated to force reload on change
+  // Cache-bust background image URL — use file ID hash to bypass browser/CDN cache
   const bgBaseUrl = floorPlan.background_image ? getDirectusMedia(floorPlan.background_image) : null
-  const bgUrl = bgBaseUrl && floorPlan.date_updated
-    ? `${bgBaseUrl}?v=${new Date(floorPlan.date_updated).getTime()}`
-    : bgBaseUrl
+  const bgUrl = bgBaseUrl ? `${bgBaseUrl}?v=${floorPlan.background_image}` : null
 
   return (
     <svg
