@@ -748,3 +748,41 @@ export interface CustomDirectusTypes {
   form_submissions: any
   projects: any
 }
+
+// --- Sponsor types ---
+
+export interface SponsorTierTranslation {
+  languages_code: string;
+  name?: string;
+  description?: string;
+}
+
+export interface SponsorTier {
+  id: string;
+  sort?: number;
+  color?: string | null;
+  logo_size?: 'sm' | 'md' | 'lg' | 'xl' | null;
+  translations?: SponsorTierTranslation[];
+}
+
+export interface SponsorTranslation {
+  languages_code: string;
+  company_name?: string;
+  company_description?: string;
+}
+
+export interface Sponsor {
+  id: string;
+  logo?: string | null;
+  website?: string | null;
+  translations?: SponsorTranslation[];
+}
+
+export interface SponsorEvent {
+  id: string;
+  is_featured?: boolean;
+  sort?: number;
+  sponsor_id?: Sponsor | null;
+  sponsor_tier_id?: SponsorTier | null;
+  exhibitor_event_id?: { id: string; booth_number?: string | null } | null;
+}

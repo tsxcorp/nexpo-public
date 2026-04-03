@@ -158,7 +158,7 @@ export default function DirectusFormBuilder({ element, hookForm, disabled, requi
     case 'image': {
       const isImage = (element.$formkit || element.type) === 'image';
       const fileValue = hookForm.watch(element.name);
-      const hasFile = fileValue instanceof FileList && fileValue.length > 0;
+      const hasFile = typeof FileList !== 'undefined' && fileValue instanceof FileList && fileValue.length > 0;
       const urlValue = typeof fileValue === 'string' && (fileValue.startsWith('http://') || fileValue.startsWith('https://')) ? fileValue : '';
 
       return (

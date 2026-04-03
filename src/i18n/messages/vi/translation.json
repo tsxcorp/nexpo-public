@@ -171,6 +171,14 @@
     "seconds": "Giây",
     "started": "Sự kiện đã bắt đầu!"
   },
+  "sponsors": {
+    "page_title": "Nhà tài trợ",
+    "sponsors_count": "nhà tài trợ",
+    "no_sponsors": "Chưa có nhà tài trợ.",
+    "back_to_list": "Quay lại danh sách nhà tài trợ",
+    "visit_website": "Truy cập website",
+    "visit_booth": "Xem gian hàng"
+  },
   "floor_plan": {
     "page_title": "Sơ đồ mặt bằng",
     "booths_total": "gian hàng",

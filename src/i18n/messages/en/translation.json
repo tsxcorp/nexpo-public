@@ -171,6 +171,14 @@
     "seconds": "Seconds",
     "started": "The event has started!"
   },
+  "sponsors": {
+    "page_title": "Sponsors",
+    "sponsors_count": "sponsors",
+    "no_sponsors": "No sponsors yet.",
+    "back_to_list": "Back to sponsors",
+    "visit_website": "Visit website",
+    "visit_booth": "Visit Booth"
+  },
   "floor_plan": {
     "page_title": "Floor Plan",
     "booths_total": "booths",
