@@ -170,5 +170,21 @@
     "minutes": "Phút",
     "seconds": "Giây",
     "started": "Sự kiện đã bắt đầu!"
+  },
+  "floor_plan": {
+    "page_title": "Sơ đồ mặt bằng",
+    "booths_total": "gian hàng",
+    "search_placeholder": "Tìm gian hàng hoặc thương hiệu...",
+    "results": "kết quả",
+    "legend": "Chú thích",
+    "select_floor": "Chọn tầng",
+    "zoom_in": "Phóng to",
+    "zoom_out": "Thu nhỏ",
+    "fit_view": "Vừa màn hình",
+    "booth_number_label": "Số gian",
+    "booth_available": "Gian hàng trống",
+    "unassigned": "Chưa có thương hiệu",
+    "close": "Đóng",
+    "no_floor_plans": "Chưa có sơ đồ mặt bằng."
   }
 }

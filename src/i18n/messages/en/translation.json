@@ -170,5 +170,21 @@
     "minutes": "Minutes",
     "seconds": "Seconds",
     "started": "The event has started!"
+  },
+  "floor_plan": {
+    "page_title": "Floor Plan",
+    "booths_total": "booths",
+    "search_placeholder": "Search booth or brand...",
+    "results": "results",
+    "legend": "Legend",
+    "select_floor": "Select floor",
+    "zoom_in": "Zoom in",
+    "zoom_out": "Zoom out",
+    "fit_view": "Fit view",
+    "booth_number_label": "Booth",
+    "booth_available": "Booth available",
+    "unassigned": "No exhibitor assigned",
+    "close": "Close",
+    "no_floor_plans": "No floor plans available."
   }
 }
