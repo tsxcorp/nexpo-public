@@ -760,8 +760,8 @@ export interface SponsorTierTranslation {
 export interface SponsorTier {
   id: string;
   sort?: number;
-  color?: string | null;
-  logo_size?: 'sm' | 'md' | 'lg' | 'xl' | null;
+  badge_color?: string | null;
+  logo_display_size?: 'sm' | 'md' | 'lg' | 'xl' | null;
   translations?: SponsorTierTranslation[];
 }
 

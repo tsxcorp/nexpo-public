@@ -12,7 +12,7 @@ import { findTranslation } from '@/lib/utils/translation-helpers'
 import SponsorCard from './sponsor-card'
 import type { SponsorEvent, SponsorTier } from '@/directus/types'
 
-/** Tailwind grid-cols classes by tier logo_size */
+/** Tailwind grid-cols classes by tier logo_display_size */
 const GRID_COLS: Record<string, string> = {
   xl: 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3',
   lg: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4',
@@ -31,11 +31,11 @@ interface SponsorGridProps {
 export default function SponsorGrid({ tier, sponsors, lang, basePath }: SponsorGridProps) {
   const translation = findTranslation(tier.translations, lang)
   const tierName = translation?.name ?? tier.id
-  const logoSize = tier.logo_size ?? 'md'
+  const logoSize = tier.logo_display_size ?? 'md'
   const cols = GRID_COLS[logoSize] ?? GRID_COLS.md
 
   // Accent bar color: use tier color if valid hex, else primary
-  const accentColor = tier.color ?? 'var(--color-primary)'
+  const accentColor = tier.badge_color ?? 'var(--color-primary)'
 
   return (
     <section className="mb-12">

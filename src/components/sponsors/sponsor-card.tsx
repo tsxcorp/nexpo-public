@@ -10,7 +10,7 @@ import { getDirectusMedia } from '@/lib/utils/directus-helpers'
 import { findTranslation } from '@/lib/utils/translation-helpers'
 import type { SponsorEvent, SponsorTier } from '@/directus/types'
 
-/** Map tier logo_size to pixel dimensions */
+/** Map tier logo_display_size to pixel dimensions */
 const LOGO_SIZE_MAP: Record<string, number> = {
   sm: 80,
   md: 120,
@@ -20,7 +20,7 @@ const LOGO_SIZE_MAP: Record<string, number> = {
 
 interface SponsorCardProps {
   sponsor: SponsorEvent
-  logoSize: SponsorTier['logo_size']
+  logoSize: SponsorTier['logo_display_size']
   lang: string
   /** URL path to sponsors list — used to build detail link */
   basePath: string
