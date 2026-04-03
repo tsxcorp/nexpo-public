@@ -22,6 +22,11 @@ import AgendaPreviewBlock from '@/components/blocks/AgendaPreviewBlock'
 import CountdownBlock from '@/components/blocks/CountdownBlock'
 import EventInfoBlock from '@/components/blocks/EventInfoBlock'
 import DividerBlock from '@/components/blocks/DividerBlock'
+import AccordionTabsBlock from '@/components/blocks/AccordionTabsBlock'
+import FloatingCtaBlock from '@/components/blocks/FloatingCtaBlock'
+import MapBlock from '@/components/blocks/MapBlock'
+import AlertBlock from '@/components/blocks/AlertBlock'
+import BlockSectionWrapper from '@/components/BlockSectionWrapper'
 import type { ExhibitorEvent, Speaker, AgendaSession, EventBasicInfo } from '@/directus/types'
 
 interface PageBuilderProps {
@@ -34,6 +39,10 @@ interface PageBuilderProps {
   speakers?: Speaker[]
   agendaSessions?: AgendaSession[]
 }
+
+// Block collections that render outside BlockSectionWrapper
+// (fixed overlays or full-bleed elements that must escape section padding/bg)
+const UNWRAPPED_COLLECTIONS = new Set(['block_floating_cta', 'block_alert'])
 
 export default function PageBuilder({
   blocks,
@@ -58,7 +67,7 @@ export default function PageBuilder({
         // Guard: skip blocks with null/undefined items to prevent crashes
         if (!block.item) return null
 
-        switch (block.collection) {
+        const blockContent = (() => { switch (block.collection) {
           case 'block_features':
             return <FeaturesBlock key={block.id || index} data={block.item} lang={lang} />
           case 'block_richtext':
@@ -107,9 +116,47 @@ export default function PageBuilder({
           case 'block_divider':
             return <DividerBlock key={block.id || index} />
 
+          // New blocks — Phase 5
+          case 'block_accordion':
+            return <AccordionTabsBlock key={block.id || index} data={block.item} lang={lang} />
+
+          // Unwrapped: renders as fixed overlay (position: fixed), bypasses section wrapper
+          case 'block_floating_cta':
+            return <FloatingCtaBlock key={block.id || index} data={block.item} lang={lang} />
+
+          case 'block_map':
+            return <MapBlock key={block.id || index} data={block.item} />
+
+          // Unwrapped: full-bleed alert bar, bypasses section padding
+          case 'block_alert':
+            return <AlertBlock key={block.id || index} data={block.item} lang={lang} />
+
           default:
             return null
+        } })();
+
+        if (!blockContent) return null
+
+        // Device visibility: apply responsive CSS classes from section_style.visibility
+        const vis = block.section_style?.visibility;
+        const visClasses = vis ? [
+          vis.mobile === false ? 'max-sm:hidden' : '',
+          vis.tablet === false ? 'sm:max-lg:hidden' : '',
+          vis.desktop === false ? 'lg:hidden' : '',
+        ].filter(Boolean).join(' ') : '';
+
+        // Floating CTA and Alert render unwrapped — no section background/padding
+        if (UNWRAPPED_COLLECTIONS.has(block.collection)) {
+          return visClasses
+            ? <div key={block.id || index} className={visClasses}>{blockContent}</div>
+            : blockContent
         }
+
+        return (
+          <BlockSectionWrapper key={block.id || index} sectionStyle={block.section_style} className={visClasses}>
+            {blockContent}
+          </BlockSectionWrapper>
+        )
       })}
     </>
   )

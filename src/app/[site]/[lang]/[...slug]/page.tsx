@@ -49,6 +49,30 @@ export default async function SlugPage({ params, searchParams }: PageProps) {
     needsAgenda && eventId ? fetchAgendaSessions(eventId) : Promise.resolve([]),
   ]);
 
+  // Content scheduling: check publish_at / unpublish_at
+  if (pageContent) {
+    const now = new Date();
+    const publishAt = (pageContent as any).publish_at ? new Date((pageContent as any).publish_at) : null;
+    const unpublishAt = (pageContent as any).unpublish_at ? new Date((pageContent as any).unpublish_at) : null;
+    if ((publishAt && now < publishAt) || (unpublishAt && now > unpublishAt)) {
+      return (
+        <>
+          <TheHeader navigation={mainNav} lang={lang} site={siteData?.slug || site} siteData={siteData} translations={[]} pathname={currentPathname} />
+          <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+            <div className="max-w-md mx-auto px-4 py-16 text-center">
+              <h1 className="text-4xl font-bold text-gray-300 mb-4">{publishAt && now < publishAt ? '🕐' : '📅'}</h1>
+              <p className="text-lg text-gray-600 mb-6">{publishAt && now < publishAt ? 'This page is not yet available' : 'This page is no longer available'}</p>
+              <a href={`/${site}/${lang}`} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity">
+                ← Back to home
+              </a>
+            </div>
+          </div>
+          <TheFooter navigation={footerNav} lang={lang} pathname={currentPathname} />
+        </>
+      );
+    }
+  }
+
   if (!pageContent) {
     return (
       <>
