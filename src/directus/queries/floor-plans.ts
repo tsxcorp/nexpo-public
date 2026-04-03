@@ -11,6 +11,7 @@ export interface FloorPlan {
   width: number
   height: number
   background_image?: string | null
+  date_updated?: string | null
   status: 'draft' | 'published' | 'archived'
 }
 
@@ -62,11 +63,11 @@ export const fetchPublishedFloorPlans = async (eventId: number): Promise<FloorPl
               event_id: { _eq: eventId },
               status: { _eq: 'published' },
             },
-            fields: ['id', 'name', 'floor_number', 'width', 'height', 'background_image', 'status'],
+            fields: ['id', 'name', 'floor_number', 'width', 'height', 'background_image', 'status', 'date_updated'],
             sort: ['floor_number'],
             limit: -1,
           }),
-          300
+          60 // shorter revalidation — floor plans change during event setup
         )
       ) as FloorPlan[]
       return items ?? []
@@ -112,7 +113,7 @@ export const fetchBoothsForFloorPlans = async (floorPlanIds: string[]): Promise<
             ],
             limit: -1,
           }),
-          300
+          60 // shorter revalidation — booths change during event setup
         )
       ) as Booth[]
       return items ?? []
