@@ -85,7 +85,7 @@ code, pre {
 
 @layer components {
   .glass {
-    @apply bg-glass-light dark:bg-glass-dark backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg;
+    @apply bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-lg;
   }
 
   .glass-card {
